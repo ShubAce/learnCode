@@ -47,3 +47,26 @@ export const onBoardUser = async () => {
 		};
 	}
 };
+
+export const currentUserRole = async () => { 
+    try {
+        const user = await currentUser();
+        if (!user) {
+            return "USER";
+        }
+        const { id } = user;
+        const userRole = await db.user.findUnique({
+            where: {
+                clerkID: id
+            },
+            select: {
+                role: true
+            }
+        })
+        return userRole?.role || "USER";
+
+    } catch (error) {
+        console.error("Error fetching user role:", error);
+        return "USER";
+     }
+}
