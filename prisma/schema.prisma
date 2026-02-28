@@ -28,6 +28,7 @@ model User {
   role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  solvedProblems ProblemSolved[]
 
   problems   Problem[]
 
@@ -38,6 +39,19 @@ enum Difficulty {
   EASY
   MEDIUM
   HARD
+}
+
+model ProblemSolved {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  solvedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
 }
 
 model Problem {
@@ -62,6 +76,7 @@ model Problem {
 
   userId     String?
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  solvedBy     ProblemSolved[]
 
   @@index([difficulty])
 }
