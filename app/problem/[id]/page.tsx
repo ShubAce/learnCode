@@ -22,11 +22,12 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { getJudge0LanguageId } from "@/lib/judge0";
 import { toast } from "sonner";
 import Link from "next/link";
-import { executeProblem, getProblemById } from "@/modules/problems/actions";
+import { executeProblem, getAllSubmissionByCurrentUserForProblem, getProblemById } from "@/modules/problems/actions";
 import { db } from "@/lib/db";
 import type { Problem } from "@/src/generated/browser";
 import { SubmissionDetails } from "@/modules/problems/components/submission-details";
 import { TestCaseTable } from "@/modules/problems/components/test-case-table";
+import { SubmissionHistory } from "@/modules/problems/components/submission-history";
 
 const getDifficultyColor = (difficulty: string) => {
 	switch (difficulty) {
@@ -47,7 +48,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 	const [code, setCode] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isRunning, setIsRunning] = useState(false);
-	const [submissionHistory, setSubmissionHistory] = useState([]);
+	const [submissionHistory, setSubmissionHistory] = useState<any[]>([]);
 	const [executionResponse, setExecutionResponse] = useState<any>(null);
 	const { theme } = useTheme();
 
@@ -66,6 +67,21 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 			}
 		};
 		fetchProblem();
+	}, [params]);
+
+	useEffect(() => {
+		const fetchSubmissionHistory = async () => {
+			try {
+				const resolvedparams = await params;
+				const submissionHistory = await getAllSubmissionByCurrentUserForProblem(resolvedparams.id);
+				if (submissionHistory?.success && submissionHistory.data) {
+					setSubmissionHistory(submissionHistory.data);
+				}
+			} catch (error) {
+				console.error("Error fetching submission history:", error);
+			}
+		};
+		fetchSubmissionHistory();
 	}, [params]);
 
 	useEffect(() => {
@@ -89,6 +105,10 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 			setExecutionResponse(res);
 			if (res.success) {
 				toast.success("Code executed successfully");
+				// Update submission history with the new submission
+				if (res.submission) {
+					setSubmissionHistory((prev) => [res.submission, ...prev]);
+				}
 			} else {
 				toast.error(res.error || "Execution failed");
 			}
@@ -235,7 +255,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 										className="p-6"
 									>
 										<div className="text-center py-8 text-muted-foreground">
-											<p>Submissions will be there</p>
+											<SubmissionHistory submissions={submissionHistory} />
 										</div>
 									</TabsContent>
 									<TabsContent
