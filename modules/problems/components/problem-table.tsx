@@ -63,18 +63,6 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 		}
 	};
 
-	const getDifficultyVariant = (difficulty: string) => {
-		switch (difficulty) {
-			case "EASY":
-				return "default";
-			case "MEDIUM":
-				return "secondary";
-			case "HARD":
-				return "destructive";
-			default:
-				return "outline";
-		}
-	};
 
 	const getDifficultyColor = (difficulty: string) => {
 		switch (difficulty) {

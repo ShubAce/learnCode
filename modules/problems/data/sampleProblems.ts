@@ -46,28 +46,53 @@ export const dpProblems = [
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `/**
+			JAVASCRIPT: `// Read input
+const n = parseInt(require('fs').readFileSync('/dev/stdin', 'utf8').trim());
+
+/**
  * @param {number} n
  * @return {number}
  */
 function climbStairs(n) {
     // Write your code here
-}`,
-			PYTHON: `class Solution:
-    def climbStairs(self, n: int) -> int:
-        # Write your code here
-        pass`,
-			JAVA: `class Solution {
-    public int climbStairs(int n) {
+}
+
+// Output result
+console.log(climbStairs(n));`,
+			PYTHON: `import sys
+n = int(sys.stdin.read().strip())
+
+def climbStairs(n: int) -> int:
+    # Write your code here
+    pass
+
+print(climbStairs(n))`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static int climbStairs(int n) {
         // Write your code here
+        return 0;
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        System.out.println(climbStairs(n));
     }
 }`,
-			CPP: `class Solution {
-public:
-    int climbStairs(int n) {
-        // Write your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+int climbStairs(int n) {
+    // Write your code here
+    return 0;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    cout << climbStairs(n) << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function climbStairs(n) {
@@ -151,24 +176,51 @@ public:
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function rob(nums) {
+			JAVASCRIPT: `// Read space-separated numbers from stdin
+const nums = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split(/\\s+/).map(Number);
+
+function rob(nums) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def rob(self, nums):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public int rob(int[] nums) {
+}
+
+console.log(rob(nums));`,
+			PYTHON: `import sys
+nums = list(map(int, sys.stdin.read().strip().split()))
+
+def rob(nums):
+    # Your code here
+    pass
+
+print(rob(nums))`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static int rob(int[] nums) {
         // Your code here
+        return 0;
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Integer> list = new ArrayList<>();
+        while (sc.hasNextInt()) list.add(sc.nextInt());
+        int[] nums = list.stream().mapToInt(i -> i).toArray();
+        System.out.println(rob(nums));
     }
 }`,
-			CPP: `class Solution {
-public:
-    int rob(vector<int>& nums) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+int rob(vector<int>& nums) {
+    // Your code here
+    return 0;
+}
+
+int main() {
+    vector<int> nums;
+    int x;
+    while (cin >> x) nums.push_back(x);
+    cout << rob(nums) << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function rob(nums) {
@@ -262,24 +314,48 @@ export const stringProblems = [
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function isPalindrome(s) {
+			JAVASCRIPT: `// Read the whole line as a string
+const s = require('fs').readFileSync('/dev/stdin', 'utf8').trim();
+
+function isPalindrome(s) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def isPalindrome(self, s):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public boolean isPalindrome(String s) {
+}
+
+console.log(isPalindrome(s).toString());`,
+			PYTHON: `import sys
+s = sys.stdin.read().strip()
+
+def isPalindrome(s: str) -> bool:
+    # Your code here
+    pass
+
+print(str(isPalindrome(s)).lower())`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static boolean isPalindrome(String s) {
         // Your code here
+        return false;
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.nextLine();
+        System.out.println(isPalindrome(s));
     }
 }`,
-			CPP: `class Solution {
-public:
-    bool isPalindrome(string s) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+bool isPalindrome(string s) {
+    // Your code here
+    return false;
+}
+
+int main() {
+    string s;
+    getline(cin, s);
+    cout << (isPalindrome(s) ? "true" : "false") << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function isPalindrome(s) {
@@ -347,24 +423,52 @@ public:
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function longestCommonPrefix(strs) {
+			JAVASCRIPT: `// Read space-separated words from stdin
+const strs = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split(/\\s+/);
+
+function longestCommonPrefix(strs) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def longestCommonPrefix(self, strs):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public String longestCommonPrefix(String[] strs) {
+}
+
+console.log(longestCommonPrefix(strs));`,
+			PYTHON: `import sys
+strs = sys.stdin.read().strip().split()
+
+def longestCommonPrefix(strs):
+    # Your code here
+    pass
+
+print(longestCommonPrefix(strs))`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static String longestCommonPrefix(String[] strs) {
         // Your code here
+        return "";
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String[] strs = sc.nextLine().trim().split("\\\\s+");
+        System.out.println(longestCommonPrefix(strs));
     }
 }`,
-			CPP: `class Solution {
-public:
-    string longestCommonPrefix(vector<string>& strs) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+string longestCommonPrefix(vector<string>& strs) {
+    // Your code here
+    return "";
+}
+
+int main() {
+    string line;
+    getline(cin, line);
+    istringstream iss(line);
+    vector<string> strs;
+    string word;
+    while (iss >> word) strs.push_back(word);
+    cout << longestCommonPrefix(strs) << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function longestCommonPrefix(strs) {
@@ -461,24 +565,64 @@ export const arrayProblems = [
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function twoSum(nums, target) {
+			JAVASCRIPT: `// Line 1: space-separated nums, Line 2: target
+const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');
+const nums = lines[0].trim().split(/\\s+/).map(Number);
+const target = parseInt(lines[1].trim());
+
+function twoSum(nums, target) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def twoSum(self, nums, target):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
+}
+
+const result = twoSum(nums, target);
+console.log('[' + result.join(',') + ']');`,
+			PYTHON: `import sys
+lines = sys.stdin.read().strip().split('\\n')
+nums = list(map(int, lines[0].strip().split()))
+target = int(lines[1].strip())
+
+def twoSum(nums, target):
+    # Your code here
+    pass
+
+result = twoSum(nums, target)
+print('[' + ','.join(map(str, result)) + ']')`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static int[] twoSum(int[] nums, int target) {
         // Your code here
+        return new int[]{};
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String[] parts = sc.nextLine().trim().split("\\\\s+");
+        int[] nums = Arrays.stream(parts).mapToInt(Integer::parseInt).toArray();
+        int target = sc.nextInt();
+        int[] r = twoSum(nums, target);
+        System.out.println("[" + r[0] + "," + r[1] + "]");
     }
 }`,
-			CPP: `class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    // Your code here
+    return {};
+}
+
+int main() {
+    string line;
+    getline(cin, line);
+    istringstream iss(line);
+    vector<int> nums;
+    int x;
+    while (iss >> x) nums.push_back(x);
+    int target;
+    cin >> target;
+    auto r = twoSum(nums, target);
+    cout << "[" << r[0] << "," << r[1] << "]" << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function twoSum(nums, target) {
@@ -565,24 +709,51 @@ public:
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function containsDuplicate(nums) {
+			JAVASCRIPT: `// Read space-separated numbers from stdin
+const nums = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split(/\\s+/).map(Number);
+
+function containsDuplicate(nums) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def containsDuplicate(self, nums):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public boolean containsDuplicate(int[] nums) {
+}
+
+console.log(containsDuplicate(nums).toString());`,
+			PYTHON: `import sys
+nums = list(map(int, sys.stdin.read().strip().split()))
+
+def containsDuplicate(nums) -> bool:
+    # Your code here
+    pass
+
+print(str(containsDuplicate(nums)).lower())`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static boolean containsDuplicate(int[] nums) {
         // Your code here
+        return false;
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Integer> list = new ArrayList<>();
+        while (sc.hasNextInt()) list.add(sc.nextInt());
+        int[] nums = list.stream().mapToInt(i -> i).toArray();
+        System.out.println(containsDuplicate(nums));
     }
 }`,
-			CPP: `class Solution {
-public:
-    bool containsDuplicate(vector<int>& nums) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+bool containsDuplicate(vector<int>& nums) {
+    // Your code here
+    return false;
+}
+
+int main() {
+    vector<int> nums;
+    int x;
+    while (cin >> x) nums.push_back(x);
+    cout << (containsDuplicate(nums) ? "true" : "false") << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function containsDuplicate(nums) {
@@ -658,24 +829,61 @@ export const graphProblems = [
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function numIslands(grid) {
+			JAVASCRIPT: `// Each line of stdin is a row: e.g. "1 1 0 0 1"\nconst lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');
+const grid = lines.map(line => line.trim().split(/\\s+/));
+
+function numIslands(grid) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def numIslands(self, grid):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public int numIslands(char[][] grid) {
+}
+
+console.log(numIslands(grid));`,
+			PYTHON: `import sys
+lines = sys.stdin.read().strip().split('\\n')
+grid = [line.strip().split() for line in lines]
+
+def numIslands(grid):
+    # Your code here
+    pass
+
+print(numIslands(grid))`,
+			JAVA: `import java.util.*;
+public class Main {
+    public static int numIslands(char[][] grid) {
         // Your code here
+        return 0;
+    }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<char[]> rows = new ArrayList<>();
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.isEmpty()) break;
+            rows.add(line.replaceAll("\\\\s+", "").toCharArray());
+        }
+        char[][] grid = rows.toArray(new char[0][]);
+        System.out.println(numIslands(grid));
     }
 }`,
-			CPP: `class Solution {
-public:
-    int numIslands(vector<vector<char>>& grid) {
-        // Your code here
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+
+int numIslands(vector<vector<char>>& grid) {
+    // Your code here
+    return 0;
+}
+
+int main() {
+    vector<vector<char>> grid;
+    string line;
+    while (getline(cin, line)) {
+        if (line.empty()) break;
+        vector<char> row;
+        for (char c : line) if (c != ' ') row.push_back(c);
+        grid.push_back(row);
     }
-};`,
+    cout << numIslands(grid) << endl;
+    return 0;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function numIslands(grid) {
@@ -802,24 +1010,80 @@ private:
 			},
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function cloneGraph(node) {
+			JAVASCRIPT: `// Build graph from adjacency list JSON [[neighbors_of_1],[neighbors_of_2],...]
+const adjList = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+function buildGraph(adjList) {
+    if (!adjList.length) return null;
+    const nodes = adjList.map((_, i) => ({ val: i + 1, neighbors: [] }));
+    adjList.forEach((neighbors, i) => { nodes[i].neighbors = neighbors.map(v => nodes[v - 1]); });
+    return nodes[0];
+}
+function serialize(node) {
+    if (!node) return '[[]]';
+    const visited = new Map(); const result = [];
+    const dfs = (n) => { if (visited.has(n)) return; visited.set(n, true); result[n.val - 1] = n.neighbors.map(nb => nb.val); n.neighbors.forEach(dfs); };
+    dfs(node);
+    return JSON.stringify(result);
+}
+
+function cloneGraph(node) {
     // Your code here
-}`,
-			PYTHON: `class Solution:
-    def cloneGraph(self, node):
-        # Your code here
-        pass`,
-			JAVA: `class Solution {
-    public Node cloneGraph(Node node) {
+}
+
+console.log(serialize(cloneGraph(buildGraph(adjList))));`,
+			PYTHON: `import sys, json
+from collections import deque
+
+adj = json.loads(sys.stdin.read().strip())
+
+class Node:
+    def __init__(self, val=0, neighbors=None): self.val=val; self.neighbors=neighbors or []
+
+def build(adj):
+    if not adj: return None
+    nodes = [Node(i+1) for i in range(len(adj))]
+    for i, neighbors in enumerate(adj): nodes[i].neighbors = [nodes[v-1] for v in neighbors]
+    return nodes[0]
+
+def serialize(node):
+    if not node: return '[[]]'
+    visited = {}; result = {}
+    def dfs(n):
+        if n.val in visited: return
+        visited[n.val] = True; result[n.val] = [nb.val for nb in n.neighbors]
+        for nb in n.neighbors: dfs(nb)
+    dfs(node)
+    return json.dumps([result[i+1] for i in range(len(result))], separators=(',',':'))
+
+def cloneGraph(node):
+    # Your code here
+    pass
+
+print(serialize(cloneGraph(build(adj))))`,
+			JAVA: `import java.util.*;
+class Node { int val; List<Node> neighbors; Node(int v){val=v;neighbors=new ArrayList<>();} }
+public class Main {
+    static Node cloneGraph(Node node) {
         // Your code here
+        return null;
+    }
+    public static void main(String[] args) {
+        // Input is adjacency list JSON e.g. [[2,4],[1,3],[2,4],[1,3]]
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Adjacency list graph problem - implement cloneGraph");
     }
 }`,
-			CPP: `class Solution {
-public:
-    Node* cloneGraph(Node* node) {
-        // Your code here
-    }
-};`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+struct Node { int val; vector<Node*> neighbors; Node(int v):val(v){} };
+Node* cloneGraph(Node* node) {
+    // Your code here
+    return nullptr;
+}
+int main() {
+    // Input is adjacency list JSON e.g. [[2,4],[1,3],[2,4],[1,3]]
+    cout << "Adjacency list graph problem - implement cloneGraph" << endl;
+}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function cloneGraph(node) {
@@ -908,10 +1172,96 @@ export const treeProblems = [
 			CPP: { input: "root = [3,9,20,null,null,15,7]", output: "3", explanation: "Depth is 3." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function maxDepth(root) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def maxDepth(self, root):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int maxDepth(TreeNode root) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Build tree from level-order array (space-sep, -1=null)
+function buildTree(vals) {
+    if (!vals.length || vals[0] === -1) return null;
+    const root = { val: vals[0], left: null, right: null };
+    const q = [root]; let i = 1;
+    while (q.length && i < vals.length) {
+        const nd = q.shift();
+        if (vals[i] !== -1) { nd.left = { val: vals[i], left: null, right: null }; q.push(nd.left); }
+        i++;
+        if (i < vals.length && vals[i] !== -1) { nd.right = { val: vals[i], left: null, right: null }; q.push(nd.right); }
+        i++;
+    }
+    return root;
+}
+const vals = require('fs').readFileSync('/dev/stdin','utf8').trim().split(/\\s+/).map(Number);
+const root = buildTree(vals);
+
+function maxDepth(root) {
+    // Your code here
+}
+
+console.log(maxDepth(root));`,
+			PYTHON: `import sys
+from collections import deque
+
+def build_tree(vals):
+    if not vals or vals[0] == -1:
+        return None
+    root = [vals[0], None, None]  # [val, left, right]
+    q = deque([root]); i = 1
+    while q and i < len(vals):
+        nd = q.popleft()
+        if vals[i] != -1:
+            nd[1] = [vals[i], None, None]; q.append(nd[1])
+        i += 1
+        if i < len(vals) and vals[i] != -1:
+            nd[2] = [vals[i], None, None]; q.append(nd[2])
+        i += 1
+    return root
+
+vals = list(map(int, sys.stdin.read().strip().split()))
+root = build_tree(vals)
+
+def maxDepth(root):
+    # root is [val, left, right]; your code here
+    pass
+
+print(maxDepth(root))`,
+			JAVA: `import java.util.*;
+class TreeNode { int val; TreeNode left, right; TreeNode(int v){val=v;} }
+public class Main {
+    static TreeNode build(int[] v) {
+        if (v.length==0||v[0]==-1) return null;
+        TreeNode root=new TreeNode(v[0]);
+        Queue<TreeNode> q=new LinkedList<>(); q.add(root); int i=1;
+        while (!q.isEmpty()&&i<v.length) {
+            TreeNode nd=q.poll();
+            if (v[i]!=-1){nd.left=new TreeNode(v[i]);q.add(nd.left);} i++;
+            if (i<v.length&&v[i]!=-1){nd.right=new TreeNode(v[i]);q.add(nd.right);} i++;
+        } return root;
+    }
+    static int maxDepth(TreeNode root) {
+        // Your code here
+        return 0;
+    }
+    public static void main(String[] a) {
+        Scanner sc=new Scanner(System.in);
+        int[] vals=Arrays.stream(sc.nextLine().trim().split("\\\\s+")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(maxDepth(build(vals)));
+    }
+}`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+struct T{int v;T*l,*r;T(int x):v(x),l(nullptr),r(nullptr){}};
+T* build(vector<int>& a){
+    if(a.empty()||a[0]==-1)return nullptr;
+    T* root=new T(a[0]); queue<T*> q; q.push(root); int i=1;
+    while(!q.empty()&&i<a.size()){
+        T* nd=q.front();q.pop();
+        if(a[i]!=-1){nd->l=new T(a[i]);q.push(nd->l);}i++;
+        if(i<a.size()&&a[i]!=-1){nd->r=new T(a[i]);q.push(nd->r);}i++;}
+    return root;}
+int maxDepth(T* root) {
+    // Your code here
+    return 0;
+}
+int main(){
+    vector<int> v; int x;
+    while(cin>>x)v.push_back(x);
+    cout<<maxDepth(build(v))<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function maxDepth(root) {\n    if (!root) return 0;\n    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));\n}`,
@@ -940,10 +1290,115 @@ export const treeProblems = [
 			CPP: { input: "root = [2,1,3]", output: "[2,3,1]", explanation: "Inverted tree." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function invertTree(root) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def invertTree(self, root):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public TreeNode invertTree(TreeNode root) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Build tree from level-order (space-sep, -1=null)
+function buildTree(vals) {
+    if (!vals.length || vals[0] === -1) return null;
+    const root = { val: vals[0], left: null, right: null };
+    const q = [root]; let i = 1;
+    while (q.length && i < vals.length) {
+        const nd = q.shift();
+        if (vals[i] !== -1) { nd.left = { val: vals[i], left: null, right: null }; q.push(nd.left); }
+        i++;
+        if (i < vals.length && vals[i] !== -1) { nd.right = { val: vals[i], left: null, right: null }; q.push(nd.right); }
+        i++;
+    }
+    return root;
+}
+function serialize(root) {
+    if (!root) return '';
+    const res = []; const q = [root];
+    while (q.length) { const nd = q.shift(); if (nd) { res.push(nd.val); q.push(nd.left, nd.right); } }
+    while (res.length && res[res.length-1] == null) res.pop();
+    return res.filter(v => v != null).join(' ');
+}
+const vals = require('fs').readFileSync('/dev/stdin','utf8').trim().split(/\\s+/).map(Number);
+const root = buildTree(vals);
+
+function invertTree(root) {
+    // Your code here
+}
+
+console.log(serialize(invertTree(root)));`,
+			PYTHON: `import sys
+from collections import deque
+
+def build_tree(vals):
+    if not vals or vals[0] == -1: return None
+    root = [vals[0], None, None]
+    q = deque([root]); i = 1
+    while q and i < len(vals):
+        nd = q.popleft()
+        if vals[i] != -1: nd[1] = [vals[i],None,None]; q.append(nd[1])
+        i += 1
+        if i < len(vals) and vals[i] != -1: nd[2] = [vals[i],None,None]; q.append(nd[2])
+        i += 1
+    return root
+
+def serialize(root):
+    if not root: return ''
+    res = []; q = deque([root])
+    while q:
+        nd = q.popleft()
+        if nd: res.append(str(nd[0])); q.append(nd[1]); q.append(nd[2])
+    return ' '.join(res)
+
+vals = list(map(int, sys.stdin.read().strip().split()))
+root = build_tree(vals)
+
+def invertTree(root):
+    # root is [val, left, right]; your code here
+    pass
+
+print(serialize(invertTree(root)))`,
+			JAVA: `import java.util.*;
+class TreeNode{int val;TreeNode left,right;TreeNode(int v){val=v;}}
+public class Main{
+    static TreeNode build(int[]v){
+        if(v.length==0||v[0]==-1)return null;
+        TreeNode root=new TreeNode(v[0]);
+        Queue<TreeNode>q=new LinkedList<>();q.add(root);int i=1;
+        while(!q.isEmpty()&&i<v.length){
+            TreeNode nd=q.poll();
+            if(v[i]!=-1){nd.left=new TreeNode(v[i]);q.add(nd.left);}i++;
+            if(i<v.length&&v[i]!=-1){nd.right=new TreeNode(v[i]);q.add(nd.right);}i++;}
+        return root;}
+    static String ser(TreeNode root){
+        if(root==null)return"";
+        List<String>res=new ArrayList<>();Queue<TreeNode>q=new LinkedList<>();q.add(root);
+        while(!q.isEmpty()){TreeNode nd=q.poll();if(nd!=null){res.add(String.valueOf(nd.val));q.add(nd.left);q.add(nd.right);}}
+        return String.join(" ",res);}
+    static TreeNode invertTree(TreeNode root){
+        // Your code here
+        return null;}
+    public static void main(String[]a){
+        Scanner sc=new Scanner(System.in);
+        int[]vals=Arrays.stream(sc.nextLine().trim().split("\\\\s+")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(ser(invertTree(build(vals))));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+struct T{int v;T*l,*r;T(int x):v(x),l(nullptr),r(nullptr){}};
+T* build(vector<int>&a){
+    if(a.empty()||a[0]==-1)return nullptr;
+    T*root=new T(a[0]);queue<T*>q;q.push(root);int i=1;
+    while(!q.empty()&&i<(int)a.size()){
+        T*nd=q.front();q.pop();
+        if(a[i]!=-1){nd->l=new T(a[i]);q.push(nd->l);}i++;
+        if(i<(int)a.size()&&a[i]!=-1){nd->r=new T(a[i]);q.push(nd->r);}i++;}
+    return root;}
+string ser(T*root){
+    if(!root)return"";
+    vector<string>res;queue<T*>q;q.push(root);
+    while(!q.empty()){T*nd=q.front();q.pop();if(nd){res.push_back(to_string(nd->v));q.push(nd->l);q.push(nd->r);}}
+    string s;for(int i=0;i<res.size();i++){if(i)s+=' ';s+=res[i];}return s;}
+T* invertTree(T* root) {
+    // Your code here
+    return nullptr;
+}
+int main(){
+    vector<int>v;int x;
+    while(cin>>x)v.push_back(x);
+    cout<<ser(invertTree(build(v)))<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function invertTree(root) {\n    if (!root) return null;\n    [root.left, root.right] = [root.right, root.left];\n    invertTree(root.left);\n    invertTree(root.right);\n    return root;\n}`,
@@ -979,10 +1434,91 @@ export const linkedListProblems = [
 			CPP: { input: "head = [1,2,3]", output: "[3,2,1]", explanation: "List reversed." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function reverseList(head) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def reverseList(self, head):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public ListNode reverseList(ListNode head) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Build linked list from space-separated values
+function buildList(vals) {
+    let head = null, tail = null;
+    for (const v of vals) {
+        const nd = { val: v, next: null };
+        if (!head) head = tail = nd;
+        else { tail.next = nd; tail = nd; }
+    }
+    return head;
+}
+function serialize(head) {
+    const res = [];
+    while (head) { res.push(head.val); head = head.next; }
+    return res.join(' ');
+}
+const vals = require('fs').readFileSync('/dev/stdin','utf8').trim().split(/\\s+/).map(Number);
+const head = buildList(vals);
+
+function reverseList(head) {
+    // Your code here
+}
+
+console.log(serialize(reverseList(head)));`,
+			PYTHON: `import sys
+
+class ListNode:
+    def __init__(self, val=0, nxt=None): self.val=val; self.next=nxt
+
+def buildList(vals):
+    dummy = ListNode()
+    cur = dummy
+    for v in vals: cur.next = ListNode(v); cur = cur.next
+    return dummy.next
+
+def serialize(head):
+    res = []
+    while head: res.append(str(head.val)); head = head.next
+    return ' '.join(res)
+
+vals = list(map(int, sys.stdin.read().strip().split()))
+head = buildList(vals)
+
+def reverseList(head):
+    # Your code here
+    pass
+
+print(serialize(reverseList(head)))`,
+			JAVA: `import java.util.*;
+class ListNode{int val;ListNode next;ListNode(int v){val=v;}}
+public class Main{
+    static ListNode build(int[]v){
+        ListNode dummy=new ListNode(0),cur=dummy;
+        for(int x:v){cur.next=new ListNode(x);cur=cur.next;}
+        return dummy.next;}
+    static String ser(ListNode h){
+        StringBuilder sb=new StringBuilder();
+        while(h!=null){if(sb.length()>0)sb.append(' ');sb.append(h.val);h=h.next;}
+        return sb.toString();}
+    static ListNode reverseList(ListNode head){
+        // Your code here
+        return null;}
+    public static void main(String[]a){
+        Scanner sc=new Scanner(System.in);
+        int[]vals=Arrays.stream(sc.nextLine().trim().split("\\\\s+")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(ser(reverseList(build(vals))));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+struct L{int v;L*n;L(int x):v(x),n(nullptr){}};
+L* build(vector<int>&a){
+    L*dummy=new L(0),*cur=dummy;
+    for(int x:a){cur->n=new L(x);cur=cur->n;}
+    return dummy->n;}
+string ser(L*h){
+    string s;
+    while(h){if(!s.empty())s+=' ';s+=to_string(h->v);h=h->n;}
+    return s;}
+L* reverseList(L* head) {
+    // Your code here
+    return nullptr;
+}
+int main(){
+    vector<int>v;int x;
+    while(cin>>x)v.push_back(x);
+    cout<<ser(reverseList(build(v)))<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function reverseList(head) {\n    let prev = null, curr = head;\n    while (curr) {\n        let next = curr.next;\n        curr.next = prev;\n        prev = curr;\n        curr = next;\n    }\n    return prev;\n}`,
@@ -1012,10 +1548,79 @@ export const linkedListProblems = [
 			CPP: { input: "list1 = [], list2 = []", output: "[]", explanation: "Empty lists." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function mergeTwoLists(list1, list2) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def mergeTwoLists(self, list1, list2):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "1 2 4, 1 3 4" (two comma-separated space-separated lists)
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const [part1, part2] = input.split(',').map(s => s.trim());
+const v1 = part1 ? part1.split(/\\s+/).map(Number) : [];
+const v2 = part2 ? part2.split(/\\s+/).map(Number) : [];
+function buildList(vals) {
+    let head=null,tail=null;
+    for(const v of vals){const nd={val:v,next:null};if(!head)head=tail=nd;else{tail.next=nd;tail=nd;}}
+    return head;
+}
+function serialize(head){const r=[];while(head){r.push(head.val);head=head.next;}return r.join(' ');}
+const list1 = buildList(v1);
+const list2 = buildList(v2);
+
+function mergeTwoLists(list1, list2) {
+    // Your code here
+}
+
+console.log(serialize(mergeTwoLists(list1, list2)));`,
+			PYTHON: `import sys
+class ListNode:
+    def __init__(self,v=0,n=None):self.val=v;self.next=n
+def build(vals):
+    dummy=ListNode();cur=dummy
+    for v in vals:cur.next=ListNode(v);cur=cur.next
+    return dummy.next
+def ser(h):
+    r=[]
+    while h:r.append(str(h.val));h=h.next
+    return ' '.join(r)
+parts=sys.stdin.read().strip().split(',')
+v1=list(map(int,parts[0].strip().split()))if parts[0].strip()else[]
+v2=list(map(int,parts[1].strip().split()))if len(parts)>1 and parts[1].strip()else[]
+list1=build(v1);list2=build(v2)
+
+def mergeTwoLists(list1, list2):
+    # Your code here
+    pass
+
+print(ser(mergeTwoLists(list1,list2)))`,
+			JAVA: `import java.util.*;
+class ListNode{int val;ListNode next;ListNode(int v){val=v;}}
+public class Main{
+    static ListNode build(int[]v){ListNode d=new ListNode(0),c=d;for(int x:v){c.next=new ListNode(x);c=c.next;}return d.next;}
+    static String ser(ListNode h){StringBuilder s=new StringBuilder();while(h!=null){if(s.length()>0)s.append(' ');s.append(h.val);h=h.next;}return s.toString();}
+    static ListNode mergeTwoLists(ListNode a,ListNode b){
+        // Your code here
+        return null;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String[]parts=sc.nextLine().split(",");
+        int[]v1=parts[0].trim().isEmpty()?new int[]{}:Arrays.stream(parts[0].trim().split("\\\\s+")).mapToInt(Integer::parseInt).toArray();
+        int[]v2=parts.length<2||parts[1].trim().isEmpty()?new int[]{}:Arrays.stream(parts[1].trim().split("\\\\s+")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(ser(mergeTwoLists(build(v1),build(v2))));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+struct L{int v;L*n;L(int x):v(x),n(nullptr){}};
+L*build(vector<int>&a){L*d=new L(0),*c=d;for(int x:a){c->n=new L(x);c=c->n;}return d->n;}
+string ser(L*h){string s;while(h){if(!s.empty())s+=' ';s+=to_string(h->v);h=h->n;}return s;}
+L*mergeTwoLists(L*a,L*b){
+    // Your code here
+    return nullptr;}
+int main(){
+    string line;getline(cin,line);
+    auto pos=line.find(',');
+    auto parse=[](string s)->vector<int>{
+        vector<int>r;istringstream ss(s);
+        int x;while(ss>>x)r.push_back(x);return r;};
+    auto v1=parse(pos!=string::npos?line.substr(0,pos):line);
+    auto v2=pos!=string::npos?parse(line.substr(pos+1)):vector<int>{};
+    auto l1=build(v1),l2=build(v2);
+    cout<<ser(mergeTwoLists(l1,l2))<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function mergeTwoLists(list1, list2) {\n    let dummy = {next: null}, tail = dummy;\n    while (list1 && list2) {\n        if (list1.val < list2.val) {\n            tail.next = list1;\n            list1 = list1.next;\n        } else {\n            tail.next = list2;\n            list2 = list2.next;\n        }\n        tail = tail.next;\n    }\n    tail.next = list1 || list2;\n    return dummy.next;\n}`,
@@ -1047,10 +1652,55 @@ export const binarySearchProblems = [
 			CPP: { input: "nums = [-1,0,3,5,9,12], target = 9", output: "4", explanation: "Index 4." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function search(nums, target) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def search(self, nums, target):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int search(int[] nums, int target) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "[-1,0,3,5,9,12], 9" (JSON array, then target)
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const bracketEnd = input.lastIndexOf(']');
+const nums = JSON.parse(input.slice(0, bracketEnd + 1));
+const target = parseInt(input.slice(bracketEnd + 2).trim());
+
+function search(nums, target) {
+    // Your code here
+}
+
+console.log(search(nums, target));`,
+			PYTHON: `import sys, json
+input = sys.stdin.read().strip()
+bracket_end = input.rfind(']')
+nums = json.loads(input[:bracket_end+1])
+target = int(input[bracket_end+2:].strip())
+
+def search(nums, target):
+    # Your code here
+    pass
+
+print(search(nums, target))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int search(int[]nums,int target){
+        // Your code here
+        return -1;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int bi=line.lastIndexOf(']');
+        String arrStr=line.substring(0,bi+1).replaceAll("[\\\\[\\\\]]","");
+        int[]nums=Arrays.stream(arrStr.split(",")).mapToInt(Integer::parseInt).toArray();
+        int target=Integer.parseInt(line.substring(bi+2).trim());
+        System.out.println(search(nums,target));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int search(vector<int>&nums,int target){
+    // Your code here
+    return -1;}
+int main(){
+    string line;getline(cin,line);
+    int bi=line.rfind(']');
+    string arrStr=line.substr(1,bi-1);
+    vector<int>nums;istringstream ss(arrStr);
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    int target=stoi(line.substr(bi+2));
+    cout<<search(nums,target)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function search(nums, target) {\n    let left = 0, right = nums.length - 1;\n    while (left <= right) {\n        let mid = Math.floor((left + right) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return -1;\n}`,
@@ -1081,10 +1731,53 @@ export const binarySearchProblems = [
 			CPP: { input: "nums = [1,3,5,6], target = 0", output: "0", explanation: "Insert at start." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function searchInsert(nums, target) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def searchInsert(self, nums, target):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int searchInsert(int[] nums, int target) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "[1,3,5,6], 5"
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const bi = input.lastIndexOf(']');
+const nums = JSON.parse(input.slice(0, bi + 1));
+const target = parseInt(input.slice(bi + 2).trim());
+
+function searchInsert(nums, target) {
+    // Your code here
+}
+
+console.log(searchInsert(nums, target));`,
+			PYTHON: `import sys, json
+line = sys.stdin.read().strip()
+bi = line.rfind(']')
+nums = json.loads(line[:bi+1])
+target = int(line[bi+2:].strip())
+
+def searchInsert(nums, target):
+    # Your code here
+    pass
+
+print(searchInsert(nums, target))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int searchInsert(int[]nums,int target){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int bi=line.lastIndexOf(']');
+        int[]nums=Arrays.stream(line.substring(1,bi).split(",")).mapToInt(Integer::parseInt).toArray();
+        int target=Integer.parseInt(line.substring(bi+2).trim());
+        System.out.println(searchInsert(nums,target));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int searchInsert(vector<int>&nums,int target){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    int bi=line.rfind(']');
+    vector<int>nums;istringstream ss(line.substr(1,bi-1));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    int target=stoi(line.substr(bi+2));
+    cout<<searchInsert(nums,target)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function searchInsert(nums, target) {\n    let left = 0, right = nums.length - 1;\n    while (left <= right) {\n        let mid = Math.floor((left + right) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[mid] < target) left = mid + 1;\n        else right = mid - 1;\n    }\n    return left;\n}`,
@@ -1117,10 +1810,38 @@ export const stackProblems = [
 			CPP: { input: "s = '()'", output: "true", explanation: "Valid." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function isValid(s) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def isValid(self, s):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public boolean isValid(String s) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    bool isValid(string s) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const s = require('fs').readFileSync('/dev/stdin','utf8').trim();
+
+function isValid(s) {
+    // Your code here
+}
+
+console.log(isValid(s).toString());`,
+			PYTHON: `import sys
+s = sys.stdin.read().strip()
+
+def isValid(s: str) -> bool:
+    # Your code here
+    pass
+
+print(str(isValid(s)).lower())`,
+			JAVA: `import java.util.*;
+public class Main{
+    static boolean isValid(String s){
+        // Your code here
+        return false;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        System.out.println(isValid(sc.nextLine().trim()));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+bool isValid(string s){
+    // Your code here
+    return false;}
+int main(){
+    string s;getline(cin,s);
+    cout<<(isValid(s)?"true":"false")<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function isValid(s) {\n    const stack = [], map = {'(': ')', '{': '}', '[': ']'};\n    for (let c of s) {\n        if (map[c]) stack.push(map[c]);\n        else if (!stack.length || stack.pop() !== c) return false;\n    }\n    return !stack.length;\n}`,
@@ -1191,10 +1912,49 @@ export const backtrackingProblems = [
 			CPP: { input: "nums = [1,2,3]", output: "[[1,2,3],[1,3,2],...]", explanation: "All permutations." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function permute(nums) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def permute(self, nums):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public List<List<Integer>> permute(int[] nums) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const nums = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function permute(nums) {
+    // Your code here
+}
+
+console.log(JSON.stringify(permute(nums)));`,
+			PYTHON: `import sys, json
+nums = json.loads(sys.stdin.read().strip())
+
+def permute(nums):
+    # Your code here
+    pass
+
+print(json.dumps(permute(nums), separators=(',', ':')))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static List<List<Integer>> permute(int[]nums){
+        // Your code here
+        return new ArrayList<>();}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]nums=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        List<List<Integer>> res=permute(nums);
+        StringBuilder sb=new StringBuilder("[");
+        for(int i=0;i<res.size();i++){if(i>0)sb.append(',');sb.append(res.get(i));}
+        sb.append(']');System.out.println(sb);}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+vector<vector<int>> permute(vector<int>&nums){
+    // Your code here
+    return {};}
+int main(){
+    string line;getline(cin,line);
+    vector<int>nums;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    auto res=permute(nums);
+    cout<<'[';
+    for(int i=0;i<res.size();i++){if(i)cout<<',';
+        cout<<'[';for(int j=0;j<res[i].size();j++){if(j)cout<<',';cout<<res[i][j];}cout<<']';}
+    cout<<']'<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function permute(nums) {\n    const result = [];\n    function backtrack(path, used) {\n        if (path.length === nums.length) {\n            result.push([...path]);\n            return;\n        }\n        for (let i = 0; i < nums.length; i++) {\n            if (used[i]) continue;\n            path.push(nums[i]);\n            used[i] = true;\n            backtrack(path, used);\n            path.pop();\n            used[i] = false;\n        }\n    }\n    backtrack([], []);\n    return result;\n}`,
@@ -1224,10 +1984,49 @@ export const backtrackingProblems = [
 			CPP: { input: "nums = [1,2]", output: "[[],[1],[2],[1,2]]", explanation: "Four subsets." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function subsets(nums) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def subsets(self, nums):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const nums = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function subsets(nums) {
+    // Your code here
+}
+
+console.log(JSON.stringify(subsets(nums)));`,
+			PYTHON: `import sys, json
+nums = json.loads(sys.stdin.read().strip())
+
+def subsets(nums):
+    # Your code here
+    pass
+
+print(json.dumps(subsets(nums), separators=(',', ':')))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static List<List<Integer>> subsets(int[]nums){
+        // Your code here
+        return new ArrayList<>();}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]nums=line.equals("[]") ? new int[]{} : Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        List<List<Integer>> res=subsets(nums);
+        StringBuilder sb=new StringBuilder("[");
+        for(int i=0;i<res.size();i++){if(i>0)sb.append(',');sb.append(res.get(i));}
+        sb.append(']');System.out.println(sb);}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+vector<vector<int>> subsets(vector<int>&nums){
+    // Your code here
+    return {};}
+int main(){
+    string line;getline(cin,line);
+    vector<int>nums;
+    if(line.size()>2){istringstream ss(line.substr(1,line.size()-2));string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));}
+    auto res=subsets(nums);
+    cout<<'[';
+    for(int i=0;i<res.size();i++){if(i)cout<<',';
+        cout<<'[';for(int j=0;j<res[i].size();j++){if(j)cout<<',';cout<<res[i][j];}cout<<']';}
+    cout<<']'<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function subsets(nums) {\n    const result = [];\n    function backtrack(start, path) {\n        result.push([...path]);\n        for (let i = start; i < nums.length; i++) {\n            path.push(nums[i]);\n            backtrack(i + 1, path);\n            path.pop();\n        }\n    }\n    backtrack(0, []);\n    return result;\n}`,
@@ -1268,10 +2067,42 @@ export const greedyProblems = [
 			CPP: { input: "nums = [3,2,1,0,4]", output: "false", explanation: "Stuck at index 3." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function canJump(nums) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def canJump(self, nums):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public boolean canJump(int[] nums) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const nums = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function canJump(nums) {
+    // Your code here
+}
+
+console.log(canJump(nums).toString());`,
+			PYTHON: `import sys, json
+nums = json.loads(sys.stdin.read().strip())
+
+def canJump(nums) -> bool:
+    # Your code here
+    pass
+
+print(str(canJump(nums)).lower())`,
+			JAVA: `import java.util.*;
+public class Main{
+    static boolean canJump(int[]nums){
+        // Your code here
+        return false;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]nums=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(canJump(nums));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+bool canJump(vector<int>&nums){
+    // Your code here
+    return false;}
+int main(){
+    string line;getline(cin,line);
+    vector<int>nums;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    cout<<(canJump(nums)?"true":"false")<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function canJump(nums) {\n    let maxReach = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (i > maxReach) return false;\n        maxReach = Math.max(maxReach, i + nums[i]);\n    }\n    return true;\n}`,
@@ -1301,10 +2132,42 @@ export const greedyProblems = [
 			CPP: { input: "prices = [7,1,5,3,6,4]", output: "7", explanation: "Multiple transactions." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function maxProfit(prices) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def maxProfit(self, prices):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int maxProfit(int[] prices) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const prices = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function maxProfit(prices) {
+    // Your code here
+}
+
+console.log(maxProfit(prices));`,
+			PYTHON: `import sys, json
+prices = json.loads(sys.stdin.read().strip())
+
+def maxProfit(prices):
+    # Your code here
+    pass
+
+print(maxProfit(prices))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int maxProfit(int[]prices){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]prices=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(maxProfit(prices));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int maxProfit(vector<int>&prices){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    vector<int>prices;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))prices.push_back(stoi(tok));
+    cout<<maxProfit(prices)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function maxProfit(prices) {\n    let profit = 0;\n    for (let i = 1; i < prices.length; i++) {\n        if (prices[i] > prices[i-1]) {\n            profit += prices[i] - prices[i-1];\n        }\n    }\n    return profit;\n}`,
@@ -1340,10 +2203,38 @@ export const slidingWindowProblems = [
 			CPP: { input: "s = 'abcabcbb'", output: "3", explanation: "Longest is 'abc'." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function lengthOfLongestSubstring(s) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def lengthOfLongestSubstring(self, s):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const s = require('fs').readFileSync('/dev/stdin','utf8').trim();
+
+function lengthOfLongestSubstring(s) {
+    // Your code here
+}
+
+console.log(lengthOfLongestSubstring(s));`,
+			PYTHON: `import sys
+s = sys.stdin.read().strip()
+
+def lengthOfLongestSubstring(s: str) -> int:
+    # Your code here
+    pass
+
+print(lengthOfLongestSubstring(s))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int lengthOfLongestSubstring(String s){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        System.out.println(lengthOfLongestSubstring(sc.nextLine()));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int lengthOfLongestSubstring(string s){
+    // Your code here
+    return 0;}
+int main(){
+    string s;getline(cin,s);
+    cout<<lengthOfLongestSubstring(s)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function lengthOfLongestSubstring(s) {\n    let left = 0, maxLen = 0;\n    const set = new Set();\n    for (let right = 0; right < s.length; right++) {\n        while (set.has(s[right])) {\n            set.delete(s[left++]);\n        }\n        set.add(s[right]);\n        maxLen = Math.max(maxLen, right - left + 1);\n    }\n    return maxLen;\n}`,
@@ -1373,10 +2264,53 @@ export const slidingWindowProblems = [
 			CPP: { input: "nums = [1,12,-5,-6,50,3], k = 4", output: "12.75", explanation: "Maximum average." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function findMaxAverage(nums, k) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def findMaxAverage(self, nums, k):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public double findMaxAverage(int[] nums, int k) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    double findMaxAverage(vector<int>& nums, int k) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "[1,12,-5,-6,50,3], 4"
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const bi = input.lastIndexOf(']');
+const nums = JSON.parse(input.slice(0, bi + 1));
+const k = parseInt(input.slice(bi + 2).trim());
+
+function findMaxAverage(nums, k) {
+    // Your code here
+}
+
+console.log(findMaxAverage(nums, k));`,
+			PYTHON: `import sys, json
+line = sys.stdin.read().strip()
+bi = line.rfind(']')
+nums = json.loads(line[:bi+1])
+k = int(line[bi+2:].strip())
+
+def findMaxAverage(nums, k):
+    # Your code here
+    pass
+
+print(findMaxAverage(nums, k))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static double findMaxAverage(int[]nums,int k){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int bi=line.lastIndexOf(']');
+        int[]nums=Arrays.stream(line.substring(1,bi).split(",")).mapToInt(Integer::parseInt).toArray();
+        int k=Integer.parseInt(line.substring(bi+2).trim());
+        System.out.println(findMaxAverage(nums,k));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+double findMaxAverage(vector<int>&nums,int k){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    int bi=line.rfind(']');
+    vector<int>nums;istringstream ss(line.substr(1,bi-1));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    int k=stoi(line.substr(bi+2));
+    cout<<findMaxAverage(nums,k)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function findMaxAverage(nums, k) {\n    let sum = 0;\n    for (let i = 0; i < k; i++) sum += nums[i];\n    let maxSum = sum;\n    for (let i = k; i < nums.length; i++) {\n        sum += nums[i] - nums[i - k];\n        maxSum = Math.max(maxSum, sum);\n    }\n    return maxSum / k;\n}`,
@@ -1417,10 +2351,42 @@ export const twoPointersProblems = [
 			CPP: { input: "height = [1,8,6,2,5,4,8,3,7]", output: "49", explanation: "Maximum area." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function maxArea(height) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def maxArea(self, height):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int maxArea(int[] height) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const height = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function maxArea(height) {
+    // Your code here
+}
+
+console.log(maxArea(height));`,
+			PYTHON: `import sys, json
+height = json.loads(sys.stdin.read().strip())
+
+def maxArea(height):
+    # Your code here
+    pass
+
+print(maxArea(height))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int maxArea(int[]height){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]height=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(maxArea(height));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int maxArea(vector<int>&height){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    vector<int>height;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))height.push_back(stoi(tok));
+    cout<<maxArea(height)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function maxArea(height) {\n    let left = 0, right = height.length - 1, maxArea = 0;\n    while (left < right) {\n        const area = Math.min(height[left], height[right]) * (right - left);\n        maxArea = Math.max(maxArea, area);\n        if (height[left] < height[right]) left++;\n        else right--;\n    }\n    return maxArea;\n}`,
@@ -1450,10 +2416,38 @@ export const twoPointersProblems = [
 			CPP: { input: "s = 'A man, a plan, a canal: Panama'", output: "true", explanation: "Valid palindrome." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function isPalindrome(s) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def isPalindrome(self, s):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public boolean isPalindrome(String s) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    bool isPalindrome(string s) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const s = require('fs').readFileSync('/dev/stdin','utf8').trim();
+
+function isPalindrome(s) {
+    // Your code here
+}
+
+console.log(isPalindrome(s).toString());`,
+			PYTHON: `import sys
+s = sys.stdin.read().strip()
+
+def isPalindrome(s: str) -> bool:
+    # Your code here
+    pass
+
+print(str(isPalindrome(s)).lower())`,
+			JAVA: `import java.util.*;
+public class Main{
+    static boolean isPalindrome(String s){
+        // Your code here
+        return false;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        System.out.println(isPalindrome(sc.nextLine()));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+bool isPalindrome(string s){
+    // Your code here
+    return false;}
+int main(){
+    string s;getline(cin,s);
+    cout<<(isPalindrome(s)?"true":"false")<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function isPalindrome(s) {\n    let left = 0, right = s.length - 1;\n    while (left < right) {\n        while (left < right && !/[a-zA-Z0-9]/.test(s[left])) left++;\n        while (left < right && !/[a-zA-Z0-9]/.test(s[right])) right--;\n        if (s[left].toLowerCase() !== s[right].toLowerCase()) return false;\n        left++;\n        right--;\n    }\n    return true;\n}`,
@@ -1491,10 +2485,42 @@ export const bitManipulationProblems = [
 			CPP: { input: "nums = [2,2,1]", output: "1", explanation: "Single number is 1." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function singleNumber(nums) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def singleNumber(self, nums):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int singleNumber(int[] nums) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const nums = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function singleNumber(nums) {
+    // Your code here
+}
+
+console.log(singleNumber(nums));`,
+			PYTHON: `import sys, json
+nums = json.loads(sys.stdin.read().strip())
+
+def singleNumber(nums):
+    # Your code here
+    pass
+
+print(singleNumber(nums))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int singleNumber(int[]nums){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]nums=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        System.out.println(singleNumber(nums));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int singleNumber(vector<int>&nums){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    vector<int>nums;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    cout<<singleNumber(nums)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function singleNumber(nums) {\n    let result = 0;\n    for (let num of nums) result ^= num;\n    return result;\n}`,
@@ -1523,10 +2549,41 @@ export const bitManipulationProblems = [
 			CPP: { input: "n = 00000000000000000000000000001011", output: "3", explanation: "Three 1 bits." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function hammingWeight(n) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def hammingWeight(self, n):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int hammingWeight(int n) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int hammingWeight(uint32_t n) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: binary string like "00000000000000000000000000001011"
+const n = parseInt(require('fs').readFileSync('/dev/stdin','utf8').trim(), 2);
+
+function hammingWeight(n) {
+    // Your code here
+}
+
+console.log(hammingWeight(n));`,
+			PYTHON: `import sys
+n = int(sys.stdin.read().strip(), 2)
+
+def hammingWeight(n: int) -> int:
+    # Your code here
+    pass
+
+print(hammingWeight(n))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int hammingWeight(int n){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        int n=(int)Long.parseLong(sc.nextLine().trim(),2);
+        System.out.println(hammingWeight(n));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int hammingWeight(uint32_t n){
+    // Your code here
+    return 0;}
+int main(){
+    string s;cin>>s;
+    uint32_t n=stoul(s,nullptr,2);
+    cout<<hammingWeight(n)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function hammingWeight(n) {\n    let count = 0;\n    while (n) {\n        count++;\n        n &= n - 1;\n    }\n    return count;\n}`,
@@ -1563,10 +2620,53 @@ export const heapProblems = [
 			CPP: { input: "nums = [3,2,1,5,6,4], k = 2", output: "5", explanation: "2nd largest element." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function findKthLargest(nums, k) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def findKthLargest(self, nums, k):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "[3,2,1,5,6,4], 2"
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const bi = input.lastIndexOf(']');
+const nums = JSON.parse(input.slice(0, bi + 1));
+const k = parseInt(input.slice(bi + 2).trim());
+
+function findKthLargest(nums, k) {
+    // Your code here
+}
+
+console.log(findKthLargest(nums, k));`,
+			PYTHON: `import sys, json
+line = sys.stdin.read().strip()
+bi = line.rfind(']')
+nums = json.loads(line[:bi+1])
+k = int(line[bi+2:].strip())
+
+def findKthLargest(nums, k):
+    # Your code here
+    pass
+
+print(findKthLargest(nums, k))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int findKthLargest(int[]nums,int k){
+        // Your code here
+        return 0;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int bi=line.lastIndexOf(']');
+        int[]nums=Arrays.stream(line.substring(1,bi).split(",")).mapToInt(Integer::parseInt).toArray();
+        int k=Integer.parseInt(line.substring(bi+2).trim());
+        System.out.println(findKthLargest(nums,k));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+int findKthLargest(vector<int>&nums,int k){
+    // Your code here
+    return 0;}
+int main(){
+    string line;getline(cin,line);
+    int bi=line.rfind(']');
+    vector<int>nums;istringstream ss(line.substr(1,bi-1));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    int k=stoi(line.substr(bi+2));
+    cout<<findKthLargest(nums,k)<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function findKthLargest(nums, k) {\n    const minHeap = [];\n    for (let num of nums) {\n        minHeap.push(num);\n        minHeap.sort((a, b) => a - b);\n        if (minHeap.length > k) minHeap.shift();\n    }\n    return minHeap[0];\n}`,
@@ -1595,10 +2695,59 @@ export const heapProblems = [
 			CPP: { input: "nums = [1,1,1,2,2,3], k = 2", output: "[1,2]", explanation: "Most frequent elements." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function topKFrequent(nums, k) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def topKFrequent(self, nums, k):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `// Input: "[1,1,1,2,2,3], 2"
+const input = require('fs').readFileSync('/dev/stdin','utf8').trim();
+const bi = input.lastIndexOf(']');
+const nums = JSON.parse(input.slice(0, bi + 1));
+const k = parseInt(input.slice(bi + 2).trim());
+
+function topKFrequent(nums, k) {
+    // Your code here
+}
+
+console.log(JSON.stringify(topKFrequent(nums, k)));`,
+			PYTHON: `import sys, json
+line = sys.stdin.read().strip()
+bi = line.rfind(']')
+nums = json.loads(line[:bi+1])
+k = int(line[bi+2:].strip())
+
+def topKFrequent(nums, k):
+    # Your code here
+    pass
+
+print(json.dumps(sorted(topKFrequent(nums,k)), separators=(',',':')))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int[] topKFrequent(int[]nums,int k){
+        // Your code here
+        return new int[]{};}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int bi=line.lastIndexOf(']');
+        int[]nums=Arrays.stream(line.substring(1,bi).split(",")).mapToInt(Integer::parseInt).toArray();
+        int k=Integer.parseInt(line.substring(bi+2).trim());
+        int[]res=topKFrequent(nums,k);
+        Arrays.sort(res);
+        System.out.println(Arrays.toString(res).replaceAll(" ",""));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+vector<int> topKFrequent(vector<int>&nums,int k){
+    // Your code here
+    return {};}
+int main(){
+    string line;getline(cin,line);
+    int bi=line.rfind(']');
+    vector<int>nums;istringstream ss(line.substr(1,bi-1));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    int k=stoi(line.substr(bi+2));
+    auto res=topKFrequent(nums,k);
+    sort(res.begin(),res.end());
+    cout<<'[';
+    for(int i=0;i<res.size();i++){if(i)cout<<',';cout<<res[i];}
+    cout<<']'<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function topKFrequent(nums, k) {\n    const freq = new Map();\n    for (let num of nums) freq.set(num, (freq.get(num) || 0) + 1);\n    return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, k).map(x => x[0]);\n}`,
@@ -1635,10 +2784,48 @@ export const sortingProblems = [
 			CPP: { input: "nums = [2,0,1]", output: "[0,1,2]", explanation: "Sorted array." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function sortColors(nums) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def sortColors(self, nums):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public void sortColors(int[] nums) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const nums = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function sortColors(nums) {
+    // Your code here (modify nums in-place)
+}
+
+sortColors(nums);
+console.log(JSON.stringify(nums));`,
+			PYTHON: `import sys, json
+nums = json.loads(sys.stdin.read().strip())
+
+def sortColors(nums) -> None:
+    # Modify nums in-place
+    pass
+
+sortColors(nums)
+print(json.dumps(nums, separators=(',', ':')))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static void sortColors(int[]nums){
+        // Your code here (in-place)
+    }
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        int[]nums=Arrays.stream(line.substring(1,line.length()-1).split(",")).mapToInt(Integer::parseInt).toArray();
+        sortColors(nums);
+        System.out.println(Arrays.toString(nums).replaceAll(" ",""));}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+void sortColors(vector<int>&nums){
+    // Your code here (in-place)
+}
+int main(){
+    string line;getline(cin,line);
+    vector<int>nums;istringstream ss(line.substr(1,line.size()-2));
+    string tok;while(getline(ss,tok,','))nums.push_back(stoi(tok));
+    sortColors(nums);
+    cout<<'[';
+    for(int i=0;i<nums.size();i++){if(i)cout<<',';cout<<nums[i];}
+    cout<<']'<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function sortColors(nums) {\n    let low = 0, mid = 0, high = nums.length - 1;\n    while (mid <= high) {\n        if (nums[mid] === 0) {\n            [nums[low], nums[mid]] = [nums[mid], nums[low]];\n            low++;\n            mid++;\n        } else if (nums[mid] === 1) {\n            mid++;\n        } else {\n            [nums[mid], nums[high]] = [nums[high], nums[mid]];\n            high--;\n        }\n    }\n}`,
@@ -1672,10 +2859,58 @@ export const sortingProblems = [
 			CPP: { input: "intervals = [[1,4],[4,5]]", output: "[[1,5]]", explanation: "Merged intervals." },
 		},
 		codeSnippets: {
-			JAVASCRIPT: `function merge(intervals) {\n    // Your code here\n}`,
-			PYTHON: `class Solution:\n    def merge(self, intervals):\n        # Your code here\n        pass`,
-			JAVA: `class Solution {\n    public int[][] merge(int[][] intervals) {\n        // Your code here\n    }\n}`,
-			CPP: `class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        // Your code here\n    }\n};`,
+			JAVASCRIPT: `const intervals = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8').trim());
+
+function merge(intervals) {
+    // Your code here
+}
+
+console.log(JSON.stringify(merge(intervals)));`,
+			PYTHON: `import sys, json
+intervals = json.loads(sys.stdin.read().strip())
+
+def merge(intervals):
+    # Your code here
+    pass
+
+print(json.dumps(merge(intervals), separators=(',', ':')))`,
+			JAVA: `import java.util.*;
+public class Main{
+    static int[][] merge(int[][]intervals){
+        // Your code here
+        return intervals;}
+    public static void main(String[]args){
+        Scanner sc=new Scanner(System.in);
+        String line=sc.nextLine().trim();
+        // parse [[a,b],[c,d],...]
+        line=line.substring(1,line.length()-1);
+        String[]pairs=line.split("\\\\],\\\\[");
+        int[][]intervals=new int[pairs.length][2];
+        for(int i=0;i<pairs.length;i++){
+            String p=pairs[i].replaceAll("[\\\\[\\\\]]","");
+            String[]parts=p.split(",");
+            intervals[i][0]=Integer.parseInt(parts[0]);intervals[i][1]=Integer.parseInt(parts[1]);}
+        int[][]res=merge(intervals);
+        StringBuilder sb=new StringBuilder("[");
+        for(int i=0;i<res.length;i++){if(i>0)sb.append(',');sb.append('[').append(res[i][0]).append(',').append(res[i][1]).append(']');}
+        sb.append(']');System.out.println(sb);}}
+`,
+			CPP: `#include <bits/stdc++.h>
+using namespace std;
+vector<vector<int>> merge(vector<vector<int>>&intervals){
+    // Your code here
+    return intervals;}
+int main(){
+    string line;getline(cin,line);
+    vector<vector<int>>intervals;
+    line=line.substr(1,line.size()-2);
+    string pair;for(int i=0;i<line.size();i++){
+        if(line[i]=='['){string p;i++;while(i<line.size()&&line[i]!=']')p+=line[i++];
+        istringstream ss(p);int a,b;char c;ss>>a>>c>>b;intervals.push_back({a,b});}}
+    auto res=merge(intervals);
+    cout<<'[';
+    for(int i=0;i<res.size();i++){if(i)cout<<',';cout<<'['<<res[i][0]<<','<<res[i][1]<<']';}
+    cout<<']'<<endl;}`,
 		},
 		referenceSolutions: {
 			JAVASCRIPT: `function merge(intervals) {\n    intervals.sort((a, b) => a[0] - b[0]);\n    const result = [intervals[0]];\n    for (let i = 1; i < intervals.length; i++) {\n        const last = result[result.length - 1];\n        if (intervals[i][0] <= last[1]) {\n            last[1] = Math.max(last[1], intervals[i][1]);\n        } else {\n            result.push(intervals[i]);\n        }\n    }\n    return result;\n}`,

@@ -11,4 +11,6 @@
 export type * from './models/User'
 export type * from './models/ProblemSolved'
 export type * from './models/Problem'
+export type * from './models/Submission'
+export type * from './models/TestCaseResult'
 export type * from './commonInputTypes'
