@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { submitBatch, poolBatchResults } from "@/lib/judge0";
 import { UserRole } from "@/src/generated/browser";
 import { currentUser } from "@clerk/nextjs/server";
+import { ca } from "date-fns/locale";
 import { revalidatePath } from "next/cache";
 
 export const getAllProblems = async () => {
@@ -262,6 +263,36 @@ export const executeProblem = async (id: string, source_code: string, language_i
 		return {
 			success: false,
 			error: error?.message || "An unexpected error occurred while executing the code.",
+		};
+	}
+};
+
+export const getAllSubmissionByCurrentUserForProblem = async (problemId: string) => {
+	try {
+		const user = await currentUser();
+		const dbUser = await db.user.findUnique({
+			where: {
+				clerkID: user?.id,
+			},
+			select: {
+				id: true,
+			},
+		});
+		const submissions = await db.submission.findMany({
+			where: {
+				problemId: problemId,
+				userId: dbUser?.id,
+			},
+		});
+		return {
+			success: true,
+			data: submissions,
+		};
+	} catch (error) {
+		console.error("Error fetching submissions:", error);
+		return {
+			success: false,
+			error: "An error occurred while fetching submissions.",
 		};
 	}
 };
