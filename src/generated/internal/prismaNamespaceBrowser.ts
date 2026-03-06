@@ -55,7 +55,9 @@ export const ModelName = {
   ProblemSolved: 'ProblemSolved',
   Problem: 'Problem',
   Submission: 'Submission',
-  TestCaseResult: 'TestCaseResult'
+  TestCaseResult: 'TestCaseResult',
+  Playlist: 'Playlist',
+  ProblemInPlaylist: 'ProblemInPlaylist'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -156,6 +158,28 @@ export const TestCaseResultScalarFieldEnum = {
 } as const
 
 export type TestCaseResultScalarFieldEnum = (typeof TestCaseResultScalarFieldEnum)[keyof typeof TestCaseResultScalarFieldEnum]
+
+
+export const PlaylistScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlaylistScalarFieldEnum = (typeof PlaylistScalarFieldEnum)[keyof typeof PlaylistScalarFieldEnum]
+
+
+export const ProblemInPlaylistScalarFieldEnum = {
+  id: 'id',
+  playlistId: 'playlistId',
+  problemId: 'problemId',
+  createdAt: 'createdAt'
+} as const
+
+export type ProblemInPlaylistScalarFieldEnum = (typeof ProblemInPlaylistScalarFieldEnum)[keyof typeof ProblemInPlaylistScalarFieldEnum]
 
 
 export const SortOrder = {
