@@ -30,6 +30,7 @@ import type { Problem } from "@/src/generated/browser";
 import { SubmissionDetails } from "@/modules/problems/components/submission-details";
 import { TestCaseTable } from "@/modules/problems/components/test-case-table";
 import { SubmissionHistory } from "@/modules/problems/components/submission-history";
+import { AiChat } from "@/modules/problems/components/ai-chat";
 import { useUser } from "@clerk/nextjs";
 
 const getDifficultyColor = (difficulty: string) => {
@@ -236,9 +237,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 					</div>
 					<ModeToggle />
 				</div>
-				<ResizablePanelGroup
-					className="min-h-[600px]"
-				>
+				<ResizablePanelGroup className="min-h-[600px]">
 					<ResizablePanel
 						defaultSize={50}
 						minSize={25}
@@ -511,6 +510,12 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</div>
+			{/* AI Chat floating assistant */}
+			<AiChat
+				problem={problem}
+				currentCode={code}
+				selectedLanguage={selectedLanguage}
+			/>
 		</div>
 	);
 };
