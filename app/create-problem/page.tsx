@@ -1,13 +1,13 @@
 import { currentUserRole } from "@/modules/auth/actions";
 import React from "react";
 import { currentUser } from "@clerk/nextjs/server";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { UserRole } from "@/src/generated/browser";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ui/mode-toggle";
 import CreateProblemForm from "@/modules/problems/components/create-problem-form";
+import Navbar from "@/modules/home/components/navbar";
 
 const CreateProblem = async () => {
 	const user = await currentUser();
@@ -17,20 +17,30 @@ const CreateProblem = async () => {
 		return redirect("/");
 	}
 	return (
-		<section className="flex flex-col items-center justify-center container mx-4 my-4">
-			<div className="flex flex-col items-center justify-center w-full">
-				<Link href="/">
-					<Button variant={"outline"}>
-						<ArrowLeft className="size-4" />
-					</Button>
-				</Link>
-				<h1 className="text-3xl font-bold text-amber-400">
-					Welcome, <span className="text-amber-700">{user?.firstName || "Guest"}</span> ! Create a Problem
-                </h1>
-                <ModeToggle/>
-            </div>
-            <CreateProblemForm />
-		</section>
+		<>
+			<Navbar userRole={userRole} />
+			<section className="flex flex-col items-center justify-center container mx-auto px-4 my-4 w-full max-w-7xl mt-24">
+				<div className="flex items-center justify-between w-full mb-8">
+					<Link href="/">
+						<Button
+							variant={"outline"}
+							size="icon"
+						>
+							<ArrowLeft className="size-4" />
+						</Button>
+					</Link>
+					<h1 className="text-2xl sm:text-3xl font-bold text-amber-400 text-center flex-1 mx-4">
+						Welcome,{" "}
+						<span className="text-amber-700">
+							{user?.firstName || "Guest"} {user?.lastName || ""}
+						</span>
+						! Create a Problem
+					</h1>
+					<div className="w-10"></div>
+				</div>
+				<CreateProblemForm />
+			</section>
+		</>
 	);
 };
 
