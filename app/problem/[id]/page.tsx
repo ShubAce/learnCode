@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { Play, Send, Code, FileText, Lightbulb, Trophy, ArrowLeft, Loader2 } from "lucide-react";
+import { Play, Send, Code, FileText, Lightbulb, Trophy, ArrowLeft, Loader2, LogIn } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ import type { Problem } from "@/src/generated/browser";
 import { SubmissionDetails } from "@/modules/problems/components/submission-details";
 import { TestCaseTable } from "@/modules/problems/components/test-case-table";
 import { SubmissionHistory } from "@/modules/problems/components/submission-history";
+import { useUser } from "@clerk/nextjs";
 
 const getDifficultyColor = (difficulty: string) => {
 	switch (difficulty) {
@@ -51,6 +53,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 	const [submissionHistory, setSubmissionHistory] = useState<any[]>([]);
 	const [executionResponse, setExecutionResponse] = useState<any>(null);
 	const { theme } = useTheme();
+	const { isSignedIn, user } = useUser();
 
 	useEffect(() => {
 		const fetchProblem = async () => {
@@ -71,6 +74,10 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
 	useEffect(() => {
 		const fetchSubmissionHistory = async () => {
+			// Only fetch submission history if user is signed in
+			if (!isSignedIn) {
+				return;
+			}
 			try {
 				const resolvedparams = await params;
 				const submissionHistory = await getAllSubmissionByCurrentUserForProblem(resolvedparams.id);
@@ -82,7 +89,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 			}
 		};
 		fetchSubmissionHistory();
-	}, [params]);
+	}, [params, isSignedIn]);
 
 	useEffect(() => {
 		if (problem) {
@@ -138,6 +145,11 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 	};
 
 	const handleSubmit = async () => {
+		// Check if user is signed in
+		if (!isSignedIn) {
+			toast.error("Please sign in to submit your solution");
+			return;
+		}
 		try {
 			setIsSubmitting(true);
 			const language_id = getJudge0LanguageId(selectedLanguage);
@@ -314,9 +326,25 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 										value="submissions"
 										className="p-6"
 									>
-										<div className="text-center py-8 text-muted-foreground">
-											<SubmissionHistory submissions={submissionHistory} />
-										</div>
+										{isSignedIn ? (
+											<div className="text-center py-8 text-muted-foreground">
+												<SubmissionHistory submissions={submissionHistory} />
+											</div>
+										) : (
+											<div className="text-center py-8 text-muted-foreground">
+												<LogIn className="h-8 w-8 mx-auto mb-4 opacity-50" />
+												<p className="mb-2">Sign in to view your submission history</p>
+												<Link href="/sign-in">
+													<Button
+														variant="outline"
+														size="sm"
+													>
+														<LogIn className="h-4 w-4 mr-2" />
+														Sign In
+													</Button>
+												</Link>
+											</div>
+										)}
 									</TabsContent>
 									<TabsContent
 										value="editorial"
@@ -393,14 +421,35 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 										<Play className="h-4 w-4" />
 										{isRunning ? "Running..." : "Run"}
 									</Button>
-									<Button
-										onClick={handleSubmit}
-										disabled={isSubmitting}
-										className="flex items-center gap-2"
-									>
-										<Send className="h-4 w-4" />
-										{isSubmitting ? "Submitting..." : "Submit"}
-									</Button>
+									{isSignedIn ? (
+										<Button
+											onClick={handleSubmit}
+											disabled={isSubmitting}
+											className="flex items-center gap-2"
+										>
+											<Send className="h-4 w-4" />
+											{isSubmitting ? "Submitting..." : "Submit"}
+										</Button>
+									) : (
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div>
+														<Button
+															disabled
+															className="flex items-center gap-2"
+														>
+															<LogIn className="h-4 w-4" />
+															Sign in to Submit
+														</Button>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Please sign in to submit your solution</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									)}
 								</div>
 							</CardContent>
 						</Card>

@@ -22,9 +22,26 @@ const ProfilePage = async () => {
 		);
 	}
 
+	// Check if it's a guest user
+	const isGuest = profileData.clerkID === "guest";
+
 	return (
 		<div className="h-full py-32">
 			<div className="container mx-auto px-4 max-w-7xl">
+				{isGuest && (
+					<div className="mb-8 p-4 bg-muted rounded-lg border border-border">
+						<p className="text-center text-sm text-muted-foreground">
+							You are viewing as a guest.
+							<a
+								href="/sign-in"
+								className="text-primary hover:underline ml-1"
+							>
+								Sign in
+							</a>{" "}
+							to access your profile and track your progress.
+						</p>
+					</div>
+				)}
 				<UserInfoCard userData={profileData} />
 				<ProfileStats
 					submissions={profileData.submissions}

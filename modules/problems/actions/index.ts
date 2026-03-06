@@ -10,31 +10,44 @@ import { revalidatePath } from "next/cache";
 export const getAllProblems = async () => {
 	try {
 		const user = await currentUser();
-		const data = await db.user.findUnique({
-			where: {
-				clerkID: user?.id,
-			},
-			select: {
-				id: true,
-			},
-		});
+
+		// Only query user data if user is logged in
+		let data = null;
+		if (user) {
+			data = await db.user.findUnique({
+				where: {
+					clerkID: user.id,
+				},
+				select: {
+					id: true,
+				},
+			});
+		}
 
 		const problems = await db.problem.findMany({
 			include: {
-				solvedBy: {
-					where: {
-						userId: data?.id,
-					},
-				},
+				solvedBy: data?.id
+					? {
+							where: {
+								userId: data.id,
+							},
+						}
+					: false,
 			},
 			orderBy: {
 				createdAt: "desc",
 			},
 		});
 
+		// Ensure solvedBy is always an array for guest users
+		const problemsWithSolvedBy = problems.map((problem) => ({
+			...problem,
+			solvedBy: problem.solvedBy || [],
+		}));
+
 		return {
 			success: true,
-			data: problems,
+			data: problemsWithSolvedBy,
 		};
 	} catch (error) {
 		console.error("Error fetching problems:", error);
@@ -268,11 +281,27 @@ export const runProblem = async (id: string, source_code: string, language_id: n
 export const submitProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
 	try {
 		const user = await currentUser();
+
+		// Require user to be logged in for submissions
+		if (!user) {
+			return {
+				success: false,
+				error: "You must be logged in to submit solutions.",
+			};
+		}
+
 		const dbUser = await db.user.findUnique({
 			where: {
-				clerkID: user?.id,
+				clerkID: user.id,
 			},
 		});
+
+		if (!dbUser) {
+			return {
+				success: false,
+				error: "User not found in database.",
+			};
+		}
 		if (!Array.isArray(stdin) || stdin.length === 0 || !Array.isArray(expected_outputs) || expected_outputs.length !== stdin.length) {
 			return {
 				success: false,
@@ -345,7 +374,7 @@ export const submitProblem = async (id: string, source_code: string, language_id
 
 		const submission = await db.submission.create({
 			data: {
-				userId: dbUser?.id || "",
+				userId: dbUser.id,
 				problemId: id,
 				sourcecode: { code: source_code },
 				language: getLanguageName(language_id),
@@ -365,13 +394,13 @@ export const submitProblem = async (id: string, source_code: string, language_id
 			await db.problemSolved.upsert({
 				where: {
 					userId_problemId: {
-						userId: dbUser?.id || "",
+						userId: dbUser.id,
 						problemId: id,
 					},
 				},
 				update: {},
 				create: {
-					userId: dbUser?.id || "",
+					userId: dbUser.id,
 					problemId: id,
 				},
 			});
@@ -422,18 +451,35 @@ export const executeProblem = submitProblem;
 export const getAllSubmissionByCurrentUserForProblem = async (problemId: string) => {
 	try {
 		const user = await currentUser();
+
+		// If no user is logged in, return empty submissions
+		if (!user) {
+			return {
+				success: true,
+				data: [],
+			};
+		}
+
 		const dbUser = await db.user.findUnique({
 			where: {
-				clerkID: user?.id,
+				clerkID: user.id,
 			},
 			select: {
 				id: true,
 			},
 		});
+
+		if (!dbUser) {
+			return {
+				success: true,
+				data: [],
+			};
+		}
+
 		const submissions = await db.submission.findMany({
 			where: {
 				problemId: problemId,
-				userId: dbUser?.id,
+				userId: dbUser.id,
 			},
 		});
 		return {
