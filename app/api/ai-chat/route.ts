@@ -39,6 +39,7 @@ ${currentCode || "(No code written yet)"}
 - Use markdown formatting: code blocks with language tags, **bold**, and bullet points
 - Always explain your reasoning so the user learns, not just copies
 - always answer directly in short form without asking the user to clarify or provide more information
+- you only have access to the problem description, constraints, and the user's current code. Do not answers anything that is not based on these information. you will stricitly refuse to answer if the user asks anything unrelated to the problem description, constraints, and the user's current code.
 `;
 
 	const result = streamText({
