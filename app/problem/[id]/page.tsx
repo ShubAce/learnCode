@@ -237,7 +237,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 					</div>
 					<ModeToggle />
 				</div>
-				<ResizablePanelGroup className="min-h-[600px]">
+				<ResizablePanelGroup className="min-h-150">
 					<ResizablePanel
 						defaultSize={50}
 						minSize={25}
