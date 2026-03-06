@@ -2,7 +2,7 @@
 
 import { useChat as useChatV6 } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 
 type AppendOptions = { body?: object };
 interface SimpleMessage {
@@ -47,9 +47,10 @@ function useChat({ api }: { api: string }) {
 	return { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages };
 }
 
+import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bot, X, Send, Sparkles, User, Loader2, RotateCcw } from "lucide-react";
+import { Bot, X, Send, Sparkles, User, Loader2, RotateCcw, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Problem } from "@/src/generated/browser";
 
@@ -66,6 +67,88 @@ const QUICK_ACTIONS = [
 	{ label: "⏱️ Optimal approach", message: "What is the optimal time and space complexity approach for this problem?" },
 ];
 
+// Map common fenced-block language tags to Monaco language ids
+const LANG_MAP: Record<string, string> = {
+	js: "javascript",
+	ts: "typescript",
+	py: "python",
+	rb: "ruby",
+	rs: "rust",
+	cpp: "cpp",
+	cs: "csharp",
+	go: "go",
+	java: "java",
+	kotlin: "kotlin",
+	swift: "swift",
+	sh: "shell",
+	bash: "shell",
+	yml: "yaml",
+	yaml: "yaml",
+	json: "json",
+	html: "html",
+	css: "css",
+	sql: "sql",
+};
+
+function CodeBlock({ lang, code }: { lang: string; code: string }) {
+	const [copied, setCopied] = useState(false);
+	const monacoLang = LANG_MAP[lang.toLowerCase()] ?? lang.toLowerCase() ?? "plaintext";
+	// Calculate editor height from line count (min 3, max 20 lines)
+	const lineCount = code.split("\n").length;
+	// Calculate editor height (min 3, max 25 lines). lineHeight=20 + 16px top+bottom padding
+	const editorHeight = Math.min(Math.max(lineCount, 3), 25) * 20 + 16;
+
+	const handleCopy = useCallback(() => {
+		navigator.clipboard.writeText(code).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		});
+	}, [code]);
+
+	return (
+		<div className="relative group my-2 rounded-lg overflow-hidden border border-zinc-700">
+			{/* header bar */}
+			<div className="flex items-center justify-between px-3 py-1 bg-zinc-800 border-b border-zinc-700">
+				<span className="text-[10px] text-zinc-400 uppercase tracking-wider">{monacoLang || "code"}</span>
+				<button
+					onClick={handleCopy}
+					className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-zinc-700 text-zinc-300 hover:bg-zinc-600 transition-colors"
+					title="Copy code"
+				>
+					{copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
+					{copied ? "Copied!" : "Copy"}
+				</button>
+			</div>
+			{/* Monaco editor */}
+			<Editor
+				height={editorHeight}
+				language={monacoLang}
+				value={code}
+				theme="vs-dark"
+				options={{
+					readOnly: true,
+					minimap: { enabled: false },
+					scrollBeyondLastLine: false,
+					lineNumbers: "on",
+					folding: false,
+					wordWrap: "off",
+					contextmenu: false,
+					scrollbar: { vertical: "hidden", horizontal: "hidden" },
+					overviewRulerLanes: 0,
+					hideCursorInOverviewRuler: true,
+					renderLineHighlight: "none",
+					fontSize: 13,
+					lineHeight: 20,
+					padding: { top: 8, bottom: 8},
+					glyphMargin: false,
+					lineDecorationsWidth: 0,
+					lineNumbersMinChars: 0,
+				}}
+			/>
+		</div>
+	);
+}
+
 function MessageContent({ content }: { content: string }) {
 	// Split on fenced code blocks
 	const parts = content.split(/(```[\s\S]*?```)/g);
@@ -77,13 +160,11 @@ function MessageContent({ content }: { content: string }) {
 					const lang = firstNewline !== -1 ? part.slice(3, firstNewline).trim() : "";
 					const code = firstNewline !== -1 ? part.slice(firstNewline + 1, -3) : part.slice(3, -3);
 					return (
-						<pre
+						<CodeBlock
 							key={i}
-							className="bg-zinc-950 text-zinc-100 border border-zinc-800 p-3 rounded-lg text-xs overflow-x-auto my-2 font-mono"
-						>
-							{lang && <div className="text-zinc-400 text-[10px] mb-1 uppercase tracking-wider">{lang}</div>}
-							{code}
-						</pre>
+							lang={lang}
+							code={code}
+						/>
 					);
 				}
 				// Render inline **bold** simply
