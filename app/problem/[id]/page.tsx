@@ -19,6 +19,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 import { getJudge0LanguageId } from "@/lib/judge0";
 import { toast } from "sonner";
@@ -235,267 +236,280 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 					</div>
 					<ModeToggle />
 				</div>
-				<div className="grid lg:grid-cols-2 gap-6">
-					<div className="space-y-6">
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<FileText className="h-5 w-5" />
-									Problem Description
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-6">
-									<p className="text-foreground leading-relaxed">{problem?.description}</p>
-
-									{/* Examples */}
-									<div>
-										<h3 className="font-semibold text-lg mb-3">Example:</h3>
-										{(() => {
-											const examples = problem?.examples as Record<
-												string,
-												{ input: string; output: string; explanation?: string }
-											> | null;
-											const currentExample = examples?.[selectedLanguage];
-											return (
-												currentExample && (
-													<div className="bg-muted p-4 rounded-lg space-y-2">
-														<div>
-															<span className="font-medium text-amber-400">Input: </span>
-															<code className="text-sm dark:bg-zinc-900 bg-zinc-200 text-zinc-900 dark:text-zinc-200 px-2 py-1 rounded">
-																{currentExample.input}
-															</code>
-														</div>
-														<div>
-															<span className="font-medium text-amber-400">Output: </span>
-															<code className="text-sm dark:bg-zinc-900 bg-zinc-200 text-zinc-900 dark:text-zinc-200 px-2 py-1 rounded">
-																{currentExample.output}
-															</code>
-														</div>
-														<div>
-															<span className="font-medium">Explanation: </span>
-															<span className="text-sm">{currentExample?.explanation}</span>
-														</div>
-													</div>
-												)
-											);
-										})()}
-									</div>
-
-									{/* Constraints */}
-									<div>
-										<h3 className="font-semibold text-lg mb-3">Constraints:</h3>
-										<div className="bg-muted p-4 rounded-lg">
-											<pre className="text-sm text-muted-foreground whitespace-pre-wrap">{problem?.constraints}</pre>
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-						{/* Tabs for Submissions, Editorial, Hints */}
-						<Card>
-							<CardContent className="p-3">
-								<Tabs
-									defaultValue="submissions"
-									className="w-full"
-								>
-									<TabsList className="grid w-full grid-cols-3">
-										<TabsTrigger
-											value="submissions"
-											className="flex items-center gap-2"
-										>
-											<Trophy className="h-4 w-4" />
-											Submissions
-										</TabsTrigger>
-										<TabsTrigger
-											value="editorial"
-											className="flex items-center gap-2"
-										>
-											<FileText className="h-4 w-4" />
-											Editorial
-										</TabsTrigger>
-										<TabsTrigger
-											value="hints"
-											className="flex items-center gap-2"
-										>
-											<Lightbulb className="h-4 w-4" />
-											Hints
-										</TabsTrigger>
-									</TabsList>
-									<TabsContent
-										value="submissions"
-										className="p-6"
-									>
-										{isSignedIn ? (
-											<div className="text-center py-8 text-muted-foreground">
-												<SubmissionHistory submissions={submissionHistory} />
-											</div>
-										) : (
-											<div className="text-center py-8 text-muted-foreground">
-												<LogIn className="h-8 w-8 mx-auto mb-4 opacity-50" />
-												<p className="mb-2">Sign in to view your submission history</p>
-												<Link href="/sign-in">
-													<Button
-														variant="outline"
-														size="sm"
-													>
-														<LogIn className="h-4 w-4 mr-2" />
-														Sign In
-													</Button>
-												</Link>
-											</div>
-										)}
-									</TabsContent>
-									<TabsContent
-										value="editorial"
-										className="p-6"
-									>
-										<div className="text-center py-8 text-muted-foreground">
-											{problem.editorial ? problem.editorial : "Editorial not available yet."}
-										</div>
-									</TabsContent>
-									<TabsContent
-										value="hints"
-										className="p-6"
-									>
-										<div className="text-center py-8 text-muted-foreground">
-											{problem.hints ? problem.hints : "No hints available for this problem."}
-										</div>
-									</TabsContent>
-								</Tabs>
-							</CardContent>
-						</Card>
-					</div>
-					<div className="space-y-6 ">
-						{/* Code Editor */}
-						<Card>
-							<CardHeader>
-								<div className="flex items-center justify-between">
+				<ResizablePanelGroup
+					className="min-h-[600px]"
+				>
+					<ResizablePanel
+						defaultSize={50}
+						minSize={25}
+					>
+						<div className="space-y-6 pr-3">
+							<Card>
+								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
-										<Code className="h-5 w-5" />
-										Code Editor
+										<FileText className="h-5 w-5" />
+										Problem Description
 									</CardTitle>
-									<Select
-										value={selectedLanguage}
-										onValueChange={setSelectedLanguage}
+								</CardHeader>
+								<CardContent>
+									<div className="space-y-6">
+										<p className="text-foreground leading-relaxed">{problem?.description}</p>
+
+										{/* Examples */}
+										<div>
+											<h3 className="font-semibold text-lg mb-3">Example:</h3>
+											{(() => {
+												const examples = problem?.examples as Record<
+													string,
+													{ input: string; output: string; explanation?: string }
+												> | null;
+												const currentExample = examples?.[selectedLanguage];
+												return (
+													currentExample && (
+														<div className="bg-muted p-4 rounded-lg space-y-2">
+															<div>
+																<span className="font-medium text-amber-400">Input: </span>
+																<code className="text-sm dark:bg-zinc-900 bg-zinc-200 text-zinc-900 dark:text-zinc-200 px-2 py-1 rounded">
+																	{currentExample.input}
+																</code>
+															</div>
+															<div>
+																<span className="font-medium text-amber-400">Output: </span>
+																<code className="text-sm dark:bg-zinc-900 bg-zinc-200 text-zinc-900 dark:text-zinc-200 px-2 py-1 rounded">
+																	{currentExample.output}
+																</code>
+															</div>
+															<div>
+																<span className="font-medium">Explanation: </span>
+																<span className="text-sm">{currentExample?.explanation}</span>
+															</div>
+														</div>
+													)
+												);
+											})()}
+										</div>
+
+										{/* Constraints */}
+										<div>
+											<h3 className="font-semibold text-lg mb-3">Constraints:</h3>
+											<div className="bg-muted p-4 rounded-lg">
+												<pre className="text-sm text-muted-foreground whitespace-pre-wrap">{problem?.constraints}</pre>
+											</div>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+							{/* Tabs for Submissions, Editorial, Hints */}
+							<Card>
+								<CardContent className="p-3">
+									<Tabs
+										defaultValue="submissions"
+										className="w-full"
 									>
-										<SelectTrigger className="w-32">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="JAVASCRIPT">JavaScript</SelectItem>
-											<SelectItem value="PYTHON">Python</SelectItem>
-											<SelectItem value="JAVA">Java</SelectItem>
-											<SelectItem value="CPP">C++</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="border rounded-lg overflow-hidden">
-									<Editor
-										height="400px"
-										language={selectedLanguage.toLowerCase() === "javascript" ? "javascript" : selectedLanguage.toLowerCase()}
-										value={code}
-										onChange={(value) => setCode(value || "")}
-										theme={theme === "dark" ? "vs-dark" : "light"}
-										options={{
-											minimap: { enabled: false },
-											fontSize: 16,
-											lineNumbers: "on",
-											roundedSelection: false,
-											scrollBeyondLastLine: false,
-											automaticLayout: true,
-											tabSize: 2,
-											wordWrap: "on",
-										}}
-									/>
-								</div>
-								<div className="flex gap-3 mt-4">
-									<Button
-										onClick={handleRun}
-										disabled={isRunning}
-										variant="outline"
-										className="flex items-center gap-2"
-									>
-										<Play className="h-4 w-4" />
-										{isRunning ? "Running..." : "Run"}
-									</Button>
-									{isSignedIn ? (
+										<TabsList className="grid w-full grid-cols-3">
+											<TabsTrigger
+												value="submissions"
+												className="flex items-center gap-2"
+											>
+												<Trophy className="h-4 w-4" />
+												Submissions
+											</TabsTrigger>
+											<TabsTrigger
+												value="editorial"
+												className="flex items-center gap-2"
+											>
+												<FileText className="h-4 w-4" />
+												Editorial
+											</TabsTrigger>
+											<TabsTrigger
+												value="hints"
+												className="flex items-center gap-2"
+											>
+												<Lightbulb className="h-4 w-4" />
+												Hints
+											</TabsTrigger>
+										</TabsList>
+										<TabsContent
+											value="submissions"
+											className="p-6"
+										>
+											{isSignedIn ? (
+												<div className="text-center py-8 text-muted-foreground">
+													<SubmissionHistory submissions={submissionHistory} />
+												</div>
+											) : (
+												<div className="text-center py-8 text-muted-foreground">
+													<LogIn className="h-8 w-8 mx-auto mb-4 opacity-50" />
+													<p className="mb-2">Sign in to view your submission history</p>
+													<Link href="/sign-in">
+														<Button
+															variant="outline"
+															size="sm"
+														>
+															<LogIn className="h-4 w-4 mr-2" />
+															Sign In
+														</Button>
+													</Link>
+												</div>
+											)}
+										</TabsContent>
+										<TabsContent
+											value="editorial"
+											className="p-6"
+										>
+											<div className="text-center py-8 text-muted-foreground">
+												{problem.editorial ? problem.editorial : "Editorial not available yet."}
+											</div>
+										</TabsContent>
+										<TabsContent
+											value="hints"
+											className="p-6"
+										>
+											<div className="text-center py-8 text-muted-foreground">
+												{problem.hints ? problem.hints : "No hints available for this problem."}
+											</div>
+										</TabsContent>
+									</Tabs>
+								</CardContent>
+							</Card>
+						</div>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel
+						defaultSize={50}
+						minSize={25}
+					>
+						<div className="space-y-6 pl-3">
+							{/* Code Editor */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center justify-between">
+										<CardTitle className="flex items-center gap-2">
+											<Code className="h-5 w-5" />
+											Code Editor
+										</CardTitle>
+										<Select
+											value={selectedLanguage}
+											onValueChange={setSelectedLanguage}
+										>
+											<SelectTrigger className="w-32">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="JAVASCRIPT">JavaScript</SelectItem>
+												<SelectItem value="PYTHON">Python</SelectItem>
+												<SelectItem value="JAVA">Java</SelectItem>
+												<SelectItem value="CPP">C++</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+								</CardHeader>
+								<CardContent>
+									<div className="border rounded-lg overflow-hidden">
+										<Editor
+											height="400px"
+											language={selectedLanguage.toLowerCase() === "javascript" ? "javascript" : selectedLanguage.toLowerCase()}
+											value={code}
+											onChange={(value) => setCode(value || "")}
+											theme={theme === "dark" ? "vs-dark" : "light"}
+											options={{
+												minimap: { enabled: false },
+												fontSize: 16,
+												lineNumbers: "on",
+												roundedSelection: false,
+												scrollBeyondLastLine: false,
+												automaticLayout: true,
+												tabSize: 2,
+												wordWrap: "on",
+											}}
+										/>
+									</div>
+									<div className="flex gap-3 mt-4">
 										<Button
-											onClick={handleSubmit}
-											disabled={isSubmitting}
+											onClick={handleRun}
+											disabled={isRunning}
+											variant="outline"
 											className="flex items-center gap-2"
 										>
-											<Send className="h-4 w-4" />
-											{isSubmitting ? "Submitting..." : "Submit"}
+											<Play className="h-4 w-4" />
+											{isRunning ? "Running..." : "Run"}
 										</Button>
-									) : (
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div>
-														<Button
-															disabled
-															className="flex items-center gap-2"
-														>
-															<LogIn className="h-4 w-4" />
-															Sign in to Submit
-														</Button>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>Please sign in to submit your solution</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									)}
-								</div>
-							</CardContent>
-						</Card>
-						{/* Test Cases */}
-						<Card>
-							<CardHeader>
-								<CardTitle>Test Cases</CardTitle>
-								<CardDescription>Run your code against these test cases</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ScrollArea className="h-48">
-									<div className="space-y-4">
-										{(() => {
-											const testCases = problem.testCases as Array<{ input: string; output: string }> | null;
-											return testCases?.map((testCase, index: number) => (
-												<div
-													key={index}
-													className="border rounded-lg p-3"
-												>
-													<div className="text-sm font-medium mb-2">Test Case {index + 1}</div>
-													<div className="space-y-1 text-sm">
+										{isSignedIn ? (
+											<Button
+												onClick={handleSubmit}
+												disabled={isSubmitting}
+												className="flex items-center gap-2"
+											>
+												<Send className="h-4 w-4" />
+												{isSubmitting ? "Submitting..." : "Submit"}
+											</Button>
+										) : (
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
 														<div>
-															<span className="text-muted-foreground">Input: </span>
-															<code className="bg-muted px-2 py-1 rounded text-xs">{testCase.input}</code>
+															<Button
+																disabled
+																className="flex items-center gap-2"
+															>
+																<LogIn className="h-4 w-4" />
+																Sign in to Submit
+															</Button>
 														</div>
-														<div>
-															<span className="text-muted-foreground">Expected: </span>
-															<code className="bg-muted px-2 py-1 rounded text-xs">{testCase.output}</code>
-														</div>
-													</div>
-												</div>
-											));
-										})()}
+													</TooltipTrigger>
+													<TooltipContent>
+														<p>Please sign in to submit your solution</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										)}
 									</div>
-								</ScrollArea>
-							</CardContent>
-						</Card>
-						{/* Test Results and Submission Details */}
-						{executionResponse && executionResponse.submission && (
-							<div className="space-y-4 mt-4">
-								<SubmissionDetails submission={executionResponse.submission} />
-								<TestCaseTable testCases={executionResponse.submission.testCases} />
-							</div>
-						)}
-					</div>
-				</div>
+								</CardContent>
+							</Card>
+							{/* Test Cases */}
+							<Card>
+								<CardHeader>
+									<CardTitle>Test Cases</CardTitle>
+									<CardDescription>Run your code against these test cases</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ScrollArea className="h-48">
+										<div className="space-y-4">
+											{(() => {
+												const testCases = problem.testCases as Array<{ input: string; output: string }> | null;
+												return testCases?.map((testCase, index: number) => (
+													<div
+														key={index}
+														className="border rounded-lg p-3"
+													>
+														<div className="text-sm font-medium mb-2">Test Case {index + 1}</div>
+														<div className="space-y-1 text-sm">
+															<div>
+																<span className="text-muted-foreground">Input: </span>
+																<code className="bg-muted px-2 py-1 rounded text-xs">{testCase.input}</code>
+															</div>
+															<div>
+																<span className="text-muted-foreground">Expected: </span>
+																<code className="bg-muted px-2 py-1 rounded text-xs">{testCase.output}</code>
+															</div>
+														</div>
+													</div>
+												));
+											})()}
+										</div>
+									</ScrollArea>
+								</CardContent>
+							</Card>
+							{/* Test Results and Submission Details */}
+							{executionResponse && executionResponse.submission && (
+								<div className="space-y-4 mt-4">
+									<SubmissionDetails submission={executionResponse.submission} />
+									<TestCaseTable testCases={executionResponse.submission.testCases} />
+								</div>
+							)}
+						</div>
+					</ResizablePanel>
+				</ResizablePanelGroup>
 			</div>
 		</div>
 	);
