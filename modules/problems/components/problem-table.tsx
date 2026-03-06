@@ -260,13 +260,14 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 															>
 																<TrashIcon className="h-4 w-4" />
 															</Button>
-															<Button
-																variant="outline"
-																size="sm"
-																disabled
-															>
-																<PencilIcon className="h-4 w-4" />
-															</Button>
+															<Link href={`/edit-problem/${problem.id}`}>
+																<Button
+																	variant="outline"
+																	size="sm"
+																>
+																	<PencilIcon className="h-4 w-4" />
+																</Button>
+															</Link>
 														</>
 													)}
 													<Button

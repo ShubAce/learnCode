@@ -22,7 +22,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { getJudge0LanguageId } from "@/lib/judge0";
 import { toast } from "sonner";
 import Link from "next/link";
-import { executeProblem, getAllSubmissionByCurrentUserForProblem, getProblemById } from "@/modules/problems/actions";
+import { runProblem, submitProblem, getAllSubmissionByCurrentUserForProblem, getProblemById } from "@/modules/problems/actions";
 import { db } from "@/lib/db";
 import type { Problem } from "@/src/generated/browser";
 import { SubmissionDetails } from "@/modules/problems/components/submission-details";
@@ -100,26 +100,86 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 			const testCases = problem?.testCases as Array<{ input: string; output: string }> | null;
 			const stdin = testCases?.map((tc: { input: string; output: string }) => tc.input) || [];
 			const expected_outputs = testCases?.map((tc: { input: string; output: string }) => tc.output) || [];
-			const res = await executeProblem(problem?.id || "", code, language_id, stdin, expected_outputs);
 
-			setExecutionResponse(res);
+			// Run without saving to database
+			const res = await runProblem(problem?.id || "", code, language_id, stdin, expected_outputs);
+
 			if (res.success) {
-				toast.success("Code executed successfully");
-				// Update submission history with the new submission
-				if (res.submission) {
-					setSubmissionHistory((prev) => [res.submission, ...prev]);
+				// Create a mock response structure similar to submission for UI display
+				const mockSubmission = {
+					id: "run-" + Date.now(),
+					status: res.allPassed ? "Accepted" : "Wrong Answer",
+					createdAt: new Date().toISOString(),
+					language: selectedLanguage,
+					memory: res.testResults?.some((r: any) => r.memory) ? JSON.stringify(res.testResults.map((r: any) => r.memory || "0 KB")) : null,
+					time: res.testResults?.some((r: any) => r.time) ? JSON.stringify(res.testResults.map((r: any) => r.time || "0 sec")) : null,
+					testCases: res.testResults,
+				};
+
+				setExecutionResponse({
+					success: true,
+					submission: mockSubmission,
+				});
+
+				if (res.allPassed) {
+					toast.success("All test cases passed!");
+				} else {
+					toast.info("Code executed. Check test results.");
 				}
 			} else {
 				toast.error(res.error || "Execution failed");
 			}
 		} catch (error) {
-			console.error("Error executing code:", error);
-			toast.error(error instanceof Error ? error.message : "An error occurred while executing the code.");
+			console.error("Error running code:", error);
+			toast.error(error instanceof Error ? error.message : "An error occurred while running the code.");
 		} finally {
 			setIsRunning(false);
 		}
 	};
-	const handleSubmit = async () => {};
+
+	const handleSubmit = async () => {
+		try {
+			setIsSubmitting(true);
+			const language_id = getJudge0LanguageId(selectedLanguage);
+			const testCases = problem?.testCases as Array<{ input: string; output: string }> | null;
+			const stdin = testCases?.map((tc: { input: string; output: string }) => tc.input) || [];
+			const expected_outputs = testCases?.map((tc: { input: string; output: string }) => tc.output) || [];
+
+			// Submit - only saves if all test cases pass
+			const res = await submitProblem(problem?.id || "", code, language_id, stdin, expected_outputs);
+
+			if (res.success && res.submission) {
+				setExecutionResponse(res);
+				toast.success("Submission successful! All test cases passed!");
+				// Update submission history with the new successful submission
+				setSubmissionHistory((prev) => [res.submission, ...prev]);
+			} else if (!res.allPassed && res.testResults) {
+				// Show test results even if submission wasn't saved
+				const mockFailedSubmission = {
+					id: "failed-submit-" + Date.now(),
+					status: "Wrong Answer",
+					createdAt: new Date().toISOString(),
+					language: selectedLanguage,
+					memory: res.testResults?.some((r: any) => r.memory) ? JSON.stringify(res.testResults.map((r: any) => r.memory || "0 KB")) : null,
+					time: res.testResults?.some((r: any) => r.time) ? JSON.stringify(res.testResults.map((r: any) => r.time || "0 sec")) : null,
+					testCases: res.testResults || [],
+				};
+
+				setExecutionResponse({
+					success: false,
+					submission: mockFailedSubmission,
+				});
+				toast.error("Submission failed. Not all test cases passed.");
+			} else {
+				toast.error(res.error || "Submission failed");
+			}
+		} catch (error) {
+			console.error("Error submitting code:", error);
+			toast.error(error instanceof Error ? error.message : "An error occurred while submitting the code.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
 	if (!problem) {
 		return (
