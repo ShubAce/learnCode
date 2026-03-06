@@ -104,6 +104,67 @@ export const deleteProblem = async (problemId: string) => {
 	}
 };
 
+export const updateProblem = async (problemId: string, problemData: any) => {
+	try {
+		const user = await currentUser();
+		if (!user) {
+			return {
+				success: false,
+				error: "Unauthorized",
+			};
+		}
+
+		const dbUser = await db.user.findUnique({
+			where: {
+				clerkID: user.id,
+			},
+			select: {
+				role: true,
+			},
+		});
+
+		if (dbUser?.role !== UserRole.ADMIN) {
+			return {
+				success: false,
+				error: "Only ADMIN can update problems",
+			};
+		}
+
+		const updatedProblem = await db.problem.update({
+			where: {
+				id: problemId,
+			},
+			data: {
+				title: problemData.title,
+				description: problemData.description,
+				difficulty: problemData.difficulty,
+				tags: problemData.tags,
+				examples: problemData.examples,
+				constraints: problemData.constraints,
+				hints: problemData.hints,
+				editorial: problemData.editorial,
+				testCases: problemData.testCases,
+				codeSnippets: problemData.codeSnippets,
+				referenceSolutions: problemData.referenceSolutions,
+			},
+		});
+
+		revalidatePath(`/problem/${problemId}`);
+		revalidatePath("/");
+		return {
+			success: true,
+			message: "Problem updated successfully",
+			data: updatedProblem,
+		};
+	} catch (error) {
+		console.error("Error updating problem:", error);
+		return {
+			success: false,
+			error: "An error occurred while updating the problem.",
+		};
+	}
+};
+
 const getLanguageName = (languageId: number): string => {
 	const languageMap: Record<number, string> = {
 		71: "PYTHON",
@@ -126,7 +187,85 @@ const normalizeOutput = (s: string | null | undefined): string => {
 		.trim();
 };
 
-export const executeProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
+// Run problem without saving to database - just returns test results
+export const runProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
+	try {
+		const user = await currentUser();
+		if (!user) {
+			return {
+				success: false,
+				error: "Unauthorized",
+			};
+		}
+
+		if (!Array.isArray(stdin) || stdin.length === 0 || !Array.isArray(expected_outputs) || expected_outputs.length !== stdin.length) {
+			return {
+				success: false,
+				error: "Invalid input: stdin and expected_outputs must be non-empty arrays of the same length.",
+			};
+		}
+
+		const submissions = stdin.map((input: string) => {
+			return {
+				source_code,
+				language_id,
+				stdin: input,
+			};
+		});
+
+		console.log("Running code (no submission):", { language_id, testCaseCount: submissions.length });
+
+		const submitResponse = await submitBatch(submissions);
+		const tokens = submitResponse.map((res: any) => res.token).filter(Boolean) as string[];
+
+		if (tokens.length === 0) {
+			return {
+				success: false,
+				error: "Judge0 did not return any submission tokens. Check your API key and URL.",
+			};
+		}
+
+		const results = await poolBatchResults(tokens);
+
+		let allPassed = true;
+
+		const detailedResults = results.map((result: any, index: number) => {
+			const stdout = normalizeOutput(result.stdout) || null;
+			const expected_output = normalizeOutput(expected_outputs[index]);
+			const passed = stdout !== null && stdout === expected_output;
+			if (!passed) {
+				allPassed = false;
+			}
+
+			return {
+				testCase: (index + 1).toString(),
+				passed,
+				stdout,
+				expected: expected_output,
+				stderr: result.stderr?.trim() || null,
+				compile_output: result.compile_output?.trim() || null,
+				status: result.status?.description || "Unknown",
+				memory: result.memory ? `${result.memory} KB` : undefined,
+				time: result.time ? `${result.time} sec` : undefined,
+			};
+		});
+
+		return {
+			success: true,
+			allPassed,
+			testResults: detailedResults,
+		};
+	} catch (error: any) {
+		console.error("runProblem error:", error);
+		return {
+			success: false,
+			error: error?.message || "An unexpected error occurred while running the code.",
+		};
+	}
+};
+
+// Submit problem - only saves to database if all test cases pass
+export const submitProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
 	try {
 		const user = await currentUser();
 		const dbUser = await db.user.findUnique({
@@ -194,6 +333,16 @@ export const executeProblem = async (id: string, source_code: string, language_i
 			};
 		});
 
+		// Only save submission if all test cases pass
+		if (!allPassed) {
+			return {
+				success: false,
+				allPassed: false,
+				testResults: detailedResults,
+				error: "Some test cases failed. Submission not saved.",
+			};
+		}
+
 		const submission = await db.submission.create({
 			data: {
 				userId: dbUser?.id || "",
@@ -259,13 +408,16 @@ export const executeProblem = async (id: string, source_code: string, language_i
 			submission: submissionWithTestCases,
 		};
 	} catch (error: any) {
-		console.error("executeProblem error:", error);
+		console.error("submitProblem error:", error);
 		return {
 			success: false,
-			error: error?.message || "An unexpected error occurred while executing the code.",
+			error: error?.message || "An unexpected error occurred while submitting the code.",
 		};
 	}
 };
+
+// Backward compatibility alias - defaults to submit behavior
+export const executeProblem = submitProblem;
 
 export const getAllSubmissionByCurrentUserForProblem = async (problemId: string) => {
 	try {
@@ -293,6 +445,27 @@ export const getAllSubmissionByCurrentUserForProblem = async (problemId: string)
 		return {
 			success: false,
 			error: "An error occurred while fetching submissions.",
+		};
+	}
+};
+
+export const getExistingProblemTitles = async () => {
+	try {
+		const problems = await db.problem.findMany({
+			select: {
+				title: true,
+			},
+		});
+		return {
+			success: true,
+			data: problems.map((p) => p.title),
+		};
+	} catch (error) {
+		console.error("Error fetching problem titles:", error);
+		return {
+			success: false,
+			error: "An error occurred while fetching problem titles.",
+			data: [],
 		};
 	}
 };

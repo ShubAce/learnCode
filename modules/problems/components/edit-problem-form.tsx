@@ -4,7 +4,7 @@ import { Editor } from "@monaco-editor/react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, Code2, FileText, Lightbulb, BookOpen, CheckCircle2, Download } from "lucide-react";
+import { Plus, Trash2, Code2, FileText, Lightbulb, BookOpen, CheckCircle2, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,27 +14,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-	dpProblems,
-	stringProblems,
-	arrayProblems,
-	graphProblems,
-	treeProblems,
-	linkedListProblems,
-	binarySearchProblems,
-	stackProblems,
-	backtrackingProblems,
-	greedyProblems,
-	slidingWindowProblems,
-	twoPointersProblems,
-	bitManipulationProblems,
-	heapProblems,
-	sortingProblems,
-} from "../data/sampleProblems";
-import { getExistingProblemTitles } from "../actions";
+import { updateProblem } from "../actions";
+import type { Problem } from "@/src/generated/browser";
 
 const problemSchema = z.object({
 	title: z.string().min(3, "Title must be at least 3 characters"),
@@ -95,7 +78,6 @@ interface CodeEditorProps {
 }
 
 const CodeEditor = ({ value, onChange, language = "javascript" }: CodeEditorProps) => {
-	// Map language names to Monaco Editor language IDs
 	const languageMap: Record<string, string> = {
 		javascript: "javascript",
 		python: "python",
@@ -129,35 +111,24 @@ const CodeEditor = ({ value, onChange, language = "javascript" }: CodeEditorProp
 	);
 };
 
-const CreateProblemForm = () => {
+const EditProblemForm = ({ problemData }: { problemData: Problem }) => {
 	const router = useRouter();
-	const [sampleType, setSampleType] = useState("DP");
 	const [isLoading, setIsLoading] = useState(false);
-	const [existingTitles, setExistingTitles] = useState<string[]>([]);
 
 	const form = useForm({
 		resolver: zodResolver(problemSchema),
 		defaultValues: {
-			testCases: [{ input: "", output: "" }],
-			tags: [{ value: "" }],
-			examples: {
-				JAVASCRIPT: { input: "", output: "", explanation: "" },
-				PYTHON: { input: "", output: "", explanation: "" },
-				JAVA: { input: "", output: "", explanation: "" },
-				CPP: { input: "", output: "", explanation: "" },
-			},
-			codeSnippets: {
-				JAVASCRIPT: "function solution() {\n  // Write your code here\n}",
-				PYTHON: "def solution():\n    # Write your code here\n    pass",
-				JAVA: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}",
-				CPP: "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}",
-			},
-			referenceSolutions: {
-				JAVASCRIPT: "// Add your reference solution here",
-				PYTHON: "# Add your reference solution here",
-				JAVA: "// Add your reference solution here",
-				CPP: "// Add your reference solution here",
-			},
+			title: problemData.title,
+			description: problemData.description,
+			difficulty: problemData.difficulty as "EASY" | "MEDIUM" | "HARD",
+			tags: problemData.tags.map((tag) => ({ value: tag })),
+			constraints: problemData.constraints,
+			hints: problemData.hints || "",
+			editorial: problemData.editorial || "",
+			testCases: problemData.testCases as Array<{ input: string; output: string }>,
+			examples: problemData.examples as any,
+			codeSnippets: problemData.codeSnippets as any,
+			referenceSolutions: problemData.referenceSolutions as any,
 		},
 	});
 
@@ -165,8 +136,6 @@ const CreateProblemForm = () => {
 		register,
 		control,
 		handleSubmit,
-		reset,
-		setValue,
 		formState: { errors },
 	} = form;
 
@@ -174,7 +143,6 @@ const CreateProblemForm = () => {
 		fields: testCaseFields,
 		append: appendTestCase,
 		remove: removeTestCase,
-		replace: replaceTestCases,
 	} = useFieldArray({
 		control,
 		name: "testCases",
@@ -184,7 +152,6 @@ const CreateProblemForm = () => {
 		fields: tagFields,
 		append: appendTag,
 		remove: removeTag,
-		replace: replaceTags,
 	} = useFieldArray({
 		control,
 		name: "tags",
@@ -193,137 +160,33 @@ const CreateProblemForm = () => {
 	const onSubmit = async (values: z.infer<typeof problemSchema>) => {
 		try {
 			setIsLoading(true);
-			console.log("Form values:", values);
-			const response = await fetch("/api/create-problem", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ ...values, tags: values.tags.map((t) => t.value) }),
+			const result = await updateProblem(problemData.id, {
+				...values,
+				tags: values.tags.map((t) => t.value),
 			});
-			const data = await response.json();
-			console.log("API response:", data);
-			if (response.ok) {
-				toast.success(data.message || "Problem created successfully");
-				router.push("/");
+
+			if (result.success) {
+				toast.success(result.message || "Problem updated successfully");
+				router.push(`/problem/${problemData.id}`);
 			} else {
-				toast.error(data.error || "Failed to create problem");
-				if (data.testCase) {
-					console.error("Test case failure:", data.testCase);
-				}
+				toast.error(result.error || "Failed to update problem");
 			}
 		} catch (error) {
-			console.error("Error creating problem:", error);
-			toast.error(error instanceof Error ? error.message : "Failed to create problem");
+			console.error("Error updating problem:", error);
+			toast.error(error instanceof Error ? error.message : "Failed to update problem");
 		} finally {
 			setIsLoading(false);
 		}
-	};
-
-	useEffect(() => {
-		const fetchExistingTitles = async () => {
-			const result = await getExistingProblemTitles();
-			if (result.success && result.data) {
-				setExistingTitles(result.data);
-			}
-		};
-		fetchExistingTitles();
-	}, []);
-
-	const problemTypes = [
-		{ value: "DP", label: "Dynamic Programming", samples: dpProblems },
-		{ value: "String", label: "String Manipulation", samples: stringProblems },
-		{ value: "Array", label: "Array / Hash Table", samples: arrayProblems },
-		{ value: "Graph", label: "Graph / BFS / DFS", samples: graphProblems },
-		{ value: "Tree", label: "Binary Tree", samples: treeProblems },
-		{ value: "LinkedList", label: "Linked List", samples: linkedListProblems },
-		{ value: "BinarySearch", label: "Binary Search", samples: binarySearchProblems },
-		{ value: "Stack", label: "Stack / Queue", samples: stackProblems },
-		{ value: "Backtracking", label: "Backtracking", samples: backtrackingProblems },
-		{ value: "Greedy", label: "Greedy Algorithm", samples: greedyProblems },
-		{ value: "SlidingWindow", label: "Sliding Window", samples: slidingWindowProblems },
-		{ value: "TwoPointers", label: "Two Pointers", samples: twoPointersProblems },
-		{ value: "BitManipulation", label: "Bit Manipulation", samples: bitManipulationProblems },
-		{ value: "Heap", label: "Heap / Priority Queue", samples: heapProblems },
-		{ value: "Sorting", label: "Sorting", samples: sortingProblems },
-	] as const;
-
-	const sampleMap: Record<string, any[]> = {
-		DP: dpProblems,
-		String: stringProblems,
-		Array: arrayProblems,
-		Graph: graphProblems,
-		Tree: treeProblems,
-		LinkedList: linkedListProblems,
-		BinarySearch: binarySearchProblems,
-		Stack: stackProblems,
-		Backtracking: backtrackingProblems,
-		Greedy: greedyProblems,
-		SlidingWindow: slidingWindowProblems,
-		TwoPointers: twoPointersProblems,
-		BitManipulation: bitManipulationProblems,
-		Heap: heapProblems,
-		Sorting: sortingProblems,
-	};
-
-	const loadSampleData = () => {
-		const samplesArray = sampleMap[sampleType] ?? dpProblems;
-
-		// Find the first problem that hasn't been published yet
-		const availableProblem = samplesArray.find((sample: any) => !existingTitles.includes(sample.title));
-
-		if (!availableProblem) {
-			toast.error("All sample problems for this category have already been published!");
-			return;
-		}
-
-		const sampleData = availableProblem;
-		replaceTags(sampleData.tags.map((tag: string) => ({ value: tag })));
-		replaceTestCases(sampleData.testCases.map((tc: { input: string; output: string }) => tc));
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		reset(sampleData as any);
-		toast.success(`Loaded sample: ${sampleData.title}`);
 	};
 
 	return (
 		<div className="container mx-auto py-8 px-4 max-w-7xl">
 			<Card className="shadow-xl">
 				<CardHeader className="pb-6">
-					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-						<CardTitle className="text-3xl flex items-center gap-3">
-							<FileText className="w-8 h-8 text-amber-600" />
-							Create Problem
-						</CardTitle>
-
-						<div className="flex flex-col md:flex-row gap-3">
-							<Select
-								value={sampleType}
-								onValueChange={setSampleType}
-							>
-								<SelectTrigger className="w-62.5">
-									<SelectValue placeholder="Select problem type..." />
-								</SelectTrigger>
-								<SelectContent>
-									{problemTypes.map((pt) => (
-										<SelectItem
-											key={pt.value}
-											value={pt.value}
-										>
-											{pt.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								onClick={loadSampleData}
-								className="gap-2"
-							>
-								<Download className="w-4 h-4" />
-								Load Sample
-							</Button>
-						</div>
-					</div>
+					<CardTitle className="text-3xl flex items-center gap-3">
+						<FileText className="w-8 h-8 text-amber-600" />
+						Edit Problem
+					</CardTitle>
 					<Separator />
 				</CardHeader>
 
@@ -379,7 +242,7 @@ const CreateProblemForm = () => {
 									render={({ field }) => (
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value}
+											value={field.value}
 										>
 											<SelectTrigger className="mt-2">
 												<SelectValue placeholder="Select difficulty" />
@@ -691,12 +554,12 @@ const CreateProblemForm = () => {
 								{isLoading ? (
 									<>
 										<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-										Creating...
+										Updating...
 									</>
 								) : (
 									<>
-										<Plus className="w-5 h-5" />
-										Create Problem
+										<Save className="w-5 h-5" />
+										Update Problem
 									</>
 								)}
 							</Button>
@@ -708,4 +571,4 @@ const CreateProblemForm = () => {
 	);
 };
 
-export default CreateProblemForm;
+export default EditProblemForm;

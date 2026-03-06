@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { onBoardUser } from "@/modules/auth/actions";
+import Link from "next/link";
 
 export default async function Home() {
 	await onBoardUser();
@@ -106,7 +107,7 @@ export default async function Home() {
 							className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-gray-900 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
 						>
 							<Play className="w-5 h-5 mr-2" />
-							Start Coding Now
+							<Link href="/problems">Start Solving Now</Link>
 							<ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
 						</Button>
 						<Button
