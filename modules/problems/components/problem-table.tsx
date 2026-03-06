@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Problem, ProblemSolved, UserRole } from "@/src/generated/browser";
+import CreatePlaylistModel from "./create-playlist";
+import AddToPlaylistModel from "./add-to-playlist";
 
 type ProblemWithSolved = Problem & { solvedBy: ProblemSolved[] };
 type DbUser = { id: string; role: UserRole } | null;
@@ -34,7 +36,7 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 		return Array.from(tagsSet);
 	}, [problems]);
 
-	const difficulties = [ "EASY", "MEDIUM", "HARD"];
+	const difficulties = ["EASY", "MEDIUM", "HARD"];
 
 	const filteredProblems = useMemo(() => {
 		return (problems || [])
@@ -62,7 +64,42 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 			toast.error("An error occurred while deleting the problem.");
 		}
 	};
-
+	const handleCreatePlaylist = async (data: { name: string; description?: string }) => {
+		try {
+			const response = await fetch("/api/playlists", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: data.name, description: data.description }),
+			});
+			const result = await response.json();
+			if (result.success) {
+				toast.success("Playlist created successfully");
+				setIsCreateModalOpen(false);
+			} else {
+				toast.error(result.error ?? "Failed to create playlist");
+			}
+		} catch {
+			toast.error("An error occurred while creating the playlist.");
+		}
+	};
+	const handleAddToPlaylist = async (data: { problemId: string; playlistId: string }) => {
+		try {
+			const response = await fetch("/api/playlists/add-problem", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ problemId: data.problemId, playlistId: data.playlistId }),
+			});
+			const result = await response.json();
+			if (result.success) {
+				setIsAddToPlaylistModalOpen(false);
+				toast.success("Problem added to playlist successfully");
+			} else {
+				toast.error(result.error ?? "Failed to add problem to playlist");
+			}
+		} catch {
+			toast.error("An error occurred while adding the problem to the playlist.");
+		}
+	};
 
 	const getDifficultyColor = (difficulty: string) => {
 		switch (difficulty) {
@@ -301,6 +338,17 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 			)}
 
 			{/* Modals */}
+			<CreatePlaylistModel
+				isOpen={isCreateModalOpen}
+				onClose={() => setIsCreateModalOpen(false)}
+				onSubmit={handleCreatePlaylist}
+			/>
+			<AddToPlaylistModel
+				isOpen={isAddToPlaylistModalOpen}
+				onClose={() => setIsAddToPlaylistModalOpen(false)}
+				onSubmit={handleAddToPlaylist}
+				problemId={selectedProblemId || ""}
+			/>
 		</div>
 	);
 };
