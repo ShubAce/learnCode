@@ -8,6 +8,24 @@ export const getCurrentUserData = async () => {
 	try {
 		const user = await currentUser();
 
+		// If no user is signed in, return guest data
+		if (!user) {
+			return {
+				id: "guest",
+				clerkID: "guest",
+				email: "guest@example.com",
+				firstName: "Guest",
+				lastName: "User",
+				imageUrl: null,
+				role: "USER" as const,
+				submissions: [],
+				solvedProblems: [],
+				playlists: [],
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
+		}
+
 		const data = await db.user.findUnique({
 			where: {
 				clerkID: user?.id,

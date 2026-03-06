@@ -213,7 +213,7 @@ const ProblemsTable = ({ problems, user }: { problems: ProblemWithSolved[]; user
 						<TableBody>
 							{paginatedProblems.length > 0 ? (
 								paginatedProblems.map((problem) => {
-									const isSolved = problem.solvedBy.length > 0;
+									const isSolved = (problem.solvedBy?.length || 0) > 0;
 									return (
 										<TableRow key={problem.id}>
 											<TableCell>
