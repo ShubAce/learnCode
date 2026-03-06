@@ -210,7 +210,7 @@ const ProblemIdPage = ({ params }: { params: Promise<{ id: string }> }) => {
 				<div className="mb-6 flex items-start justify-between">
 					<div>
 						<div className="flex items-center gap-4 mb-4">
-							<Link href="/problem">
+							<Link href="/problems">
 								<Button
 									variant="outline"
 									size="icon"
