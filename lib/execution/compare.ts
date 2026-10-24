@@ -11,39 +11,72 @@ export function normalizeOutput(value: string | null | undefined): string {
 
 const tokens = (value: string) => value.split(/\s+/).filter(Boolean);
 
-/** Parses JSON-ish literals, accepting Python spellings such as True / None and single quotes. */
-function parseLiteral(value: string): unknown {
-	if (!/^[[{]/.test(value)) return undefined;
-	try {
-		return JSON.parse(value.replace(/\bTrue\b/g, "true").replace(/\bFalse\b/g, "false").replace(/\bNone\b/g, "null").replace(/'/g, '"'));
-	} catch {
-		return undefined;
+const sameTokens = (a: string, b: string) => {
+	const left = tokens(a);
+	const right = tokens(b);
+	return left.length === right.length && left.every((token, i) => token === right[i]);
+};
+
+const PYTHON_LITERALS: Record<string, string> = { True: "true", False: "false", None: "null" };
+
+/**
+ * Canonical form of a JSON / Python literal such as `[1, 2]`, `['a', "b"]` or `{'k': True}`:
+ * whitespace outside strings is dropped, quotes become double quotes and Python keywords map to JSON.
+ * Numbers stay as text, so large integers are compared exactly. Returns undefined for non-literals.
+ */
+function canonicalLiteral(value: string): string | undefined {
+	if (!/^[[{(]/.test(value)) return undefined;
+
+	let out = "";
+	let bare = "";
+	let quote: string | null = null;
+	const flushBare = () => {
+		out += bare.replace(/\b(True|False|None)\b/g, (word) => PYTHON_LITERALS[word]);
+		bare = "";
+	};
+
+	for (let i = 0; i < value.length; i++) {
+		const char = value[i];
+		if (quote) {
+			if (char === "\\") {
+				out += char + (value[i + 1] ?? "");
+				i++;
+			} else if (char === quote) {
+				out += '"';
+				quote = null;
+			} else {
+				out += char === '"' ? '\\"' : char;
+			}
+		} else if (char === '"' || char === "'") {
+			flushBare();
+			quote = char;
+			out += '"';
+		} else if (!/\s/.test(char)) {
+			bare += char === "(" ? "[" : char === ")" ? "]" : char;
+		}
 	}
+	flushBare();
+	return quote ? undefined : out;
 }
 
-function deepEqual(a: unknown, b: unknown): boolean {
-	if (a === b) return true;
-	if (typeof a !== typeof b || a === null || b === null || typeof a !== "object") return false;
-	if (Array.isArray(a) !== Array.isArray(b)) return false;
-	const keysA = Object.keys(a as object);
-	const keysB = Object.keys(b as object);
-	return keysA.length === keysB.length && keysA.every((key) => deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
+function linesMatch(actual: string, expected: string): boolean {
+	if (actual === expected || sameTokens(actual, expected)) return true;
+	if (/^(true|false)$/i.test(actual) && /^(true|false)$/i.test(expected)) return actual.toLowerCase() === expected.toLowerCase();
+	const canonicalActual = canonicalLiteral(actual.trim());
+	return canonicalActual !== undefined && canonicalActual === canonicalLiteral(expected.trim());
 }
 
 /**
  * Compares normalised outputs. Beyond an exact match it tolerates harmless formatting differences:
- * spacing between tokens, `[1, 2]` vs `[1,2]`, and Python's `True` vs `true`.
+ * spacing between tokens, `[1, 2]` vs `[1,2]`, Python's `True` vs `true`, and values split
+ * across lines differently (`1 2 3` vs one value per line).
  */
 export function outputsMatch(actual: string, expected: string): boolean {
 	if (actual === expected) return true;
 
-	const a = tokens(actual);
-	const e = tokens(expected);
-	if (a.length === e.length && a.every((token, i) => token === e[i])) return true;
+	const actualLines = actual.split("\n");
+	const expectedLines = expected.split("\n");
+	if (actualLines.length === expectedLines.length && actualLines.every((line, i) => linesMatch(line, expectedLines[i]))) return true;
 
-	if (/^(true|false)$/i.test(actual) && /^(true|false)$/i.test(expected)) return actual.toLowerCase() === expected.toLowerCase();
-
-	const parsedActual = parseLiteral(actual);
-	const parsedExpected = parseLiteral(expected);
-	return parsedActual !== undefined && parsedExpected !== undefined && deepEqual(parsedActual, parsedExpected);
+	return sameTokens(actual, expected);
 }

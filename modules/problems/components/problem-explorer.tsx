@@ -51,6 +51,13 @@ const STATUS_FILTERS: { value: "all" | ProblemStatus; label: string }[] = [
 
 const DIFFICULTY_ORDER: Record<Difficulty, number> = { EASY: 0, MEDIUM: 1, HARD: 2 };
 
+/** Page numbers to show: first, last and the neighbours of the current page, with gaps as "…". */
+function pageWindow(current: number, count: number): (number | "…")[] {
+	if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
+	const pages = [...new Set([1, current - 1, current, current + 1, count])].filter((p) => p >= 1 && p <= count).sort((a, b) => a - b);
+	return pages.flatMap((page, i) => (i > 0 && page - pages[i - 1] > 1 ? ["…" as const, page] : [page]));
+}
+
 function StatusIcon({ status }: { status: ProblemStatus }) {
 	if (status === "solved") {
 		return (
@@ -465,17 +472,26 @@ export function ProblemExplorer({ problems, isSignedIn, isAdmin, initialDifficul
 						>
 							<ChevronLeft />
 						</Button>
-						{Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
-							<Button
-								key={n}
-								variant={n === currentPage ? "default" : "ghost"}
-								size="icon-sm"
-								onClick={() => setPage(n)}
-								aria-current={n === currentPage ? "page" : undefined}
-							>
-								{n}
-							</Button>
-						))}
+						{pageWindow(currentPage, pageCount).map((n, i) =>
+							n === "…" ? (
+								<span
+									key={`gap-${i}`}
+									className="px-1 text-sm text-muted-foreground"
+								>
+									…
+								</span>
+							) : (
+								<Button
+									key={n}
+									variant={n === currentPage ? "default" : "ghost"}
+									size="icon-sm"
+									onClick={() => setPage(n)}
+									aria-current={n === currentPage ? "page" : undefined}
+								>
+									{n}
+								</Button>
+							),
+						)}
 						<Button
 							variant="outline"
 							size="icon-sm"

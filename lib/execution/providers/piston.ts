@@ -9,6 +9,8 @@ import { describeExitCode, mapWithConcurrency, readLanguageOverrides, requestJso
  *   PISTON_API_URL    e.g. http://localhost:2000/api/v2
  *   PISTON_API_KEY    optional, sent as the Authorization header
  *   PISTON_RUNTIMES   optional JSON overrides, e.g. {"PYTHON":{"language":"python","version":"3.12.0"}}
+ *   PISTON_RUN_TIMEOUT_MS / PISTON_COMPILE_TIMEOUT_MS
+ *                     must not exceed the server's own limits (Piston defaults: 3000 / 10000)
  */
 
 type Runtime = { language: string; version: string; file: string };
@@ -36,6 +38,8 @@ const config = () => ({
 	url: process.env.PISTON_API_URL?.replace(/\/+$/, ""),
 	key: process.env.PISTON_API_KEY,
 	runtimes: { ...RUNTIMES, ...readLanguageOverrides<Runtime>("PISTON_RUNTIMES") },
+	runTimeoutMs: Number(process.env.PISTON_RUN_TIMEOUT_MS) || 3_000,
+	compileTimeoutMs: Number(process.env.PISTON_COMPILE_TIMEOUT_MS) || 10_000,
 });
 
 function toResult({ run, compile }: PistonResponse): ExecutionResult {
@@ -60,7 +64,7 @@ export const pistonProvider: ExecutionProvider = {
 	label: "Piston",
 	isConfigured: () => Boolean(config().url),
 	async execute(requests) {
-		const { url, key, runtimes } = config();
+		const { url, key, runtimes, runTimeoutMs, compileTimeoutMs } = config();
 
 		return mapWithConcurrency(requests, 4, async ({ language, source, stdin }) => {
 			const runtime = runtimes[language];
@@ -72,8 +76,8 @@ export const pistonProvider: ExecutionProvider = {
 					version: runtime.version,
 					files: [{ name: runtime.file, content: source }],
 					stdin,
-					compile_timeout: 10_000,
-					run_timeout: 5_000,
+					compile_timeout: compileTimeoutMs,
+					run_timeout: runTimeoutMs,
 				},
 			});
 			return toResult(response);

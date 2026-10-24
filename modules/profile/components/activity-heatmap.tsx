@@ -22,12 +22,14 @@ export function ActivityHeatmap({ days, activeDays }: { days: HeatmapDay[]; acti
 			description={`${pluralize(total, "submission")} in the last 6 months · ${pluralize(activeDays, "active day")} overall`}
 		>
 			<div className="overflow-x-auto pb-1">
-				<div className="flex min-w-fit gap-[3px]">
-					<div className="mr-1 grid grid-rows-7 gap-[3px] pt-5 text-[10px] text-muted-foreground">
+				{/* Week columns flex to fill the card, between 10px and 18px per cell */}
+				<div className="flex min-w-fit gap-0.75">
+					<div className="mr-1 flex flex-col gap-0.75 text-[10px] text-muted-foreground">
+						<span className="h-4" />
 						{WEEKDAY_LABELS.map((label, i) => (
 							<span
 								key={i}
-								className="flex h-3 items-center leading-none"
+								className="flex aspect-square min-h-2.5 items-center leading-none"
 							>
 								{label}
 							</span>
@@ -38,14 +40,16 @@ export function ActivityHeatmap({ days, activeDays }: { days: HeatmapDay[]; acti
 						return (
 							<div
 								key={week[0].date}
-								className="flex flex-col gap-[3px]"
+								className="flex max-w-4.5 min-w-2.5 flex-1 flex-col gap-0.75"
 							>
-								<span className="h-4 text-[10px] whitespace-nowrap text-muted-foreground">{firstOfMonth ? format(parseISO(firstOfMonth.date), "MMM") : ""}</span>
+								<span className="h-4 overflow-visible text-[10px] whitespace-nowrap text-muted-foreground">
+									{firstOfMonth ? format(parseISO(firstOfMonth.date), "MMM") : ""}
+								</span>
 								{week.map((day) => (
 									<span
 										key={day.date}
 										title={`${pluralize(day.count, "submission")} on ${format(parseISO(day.date), "MMM d, yyyy")}`}
-										className={cn("size-3 rounded-[3px] transition-transform hover:scale-125", LEVELS[levelFor(day.count, max)])}
+										className={cn("aspect-square w-full rounded-[3px] transition-transform hover:scale-125", LEVELS[levelFor(day.count, max)])}
 									/>
 								))}
 							</div>

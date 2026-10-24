@@ -69,6 +69,8 @@ async function runOnChain(requests: ExecutionRequest[]): Promise<{ provider: str
 }
 
 export async function execute(requests: ExecutionRequest[]): Promise<{ provider: string; results: ExecutionResult[] }> {
+	if (requests.length === 0) return { provider: "none", results: [] };
+
 	const keys = requests.map(cacheKey);
 	const now = Date.now();
 	const hits = keys.map((key) => {

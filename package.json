@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "piston:up": "docker compose --profile piston up -d piston",
+    "piston:setup": "node --env-file-if-exists=.env scripts/setup-piston.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",

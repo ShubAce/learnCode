@@ -49,7 +49,7 @@ export function PlaylistGrid({ playlists }: { playlists: ProfileData["playlists"
 										<ListMusic className="size-5" />
 									</span>
 									<span className="flex min-w-0 flex-col">
-										<span className="truncate font-medium group-hover:text-primary">{playlist.name}</span>
+										<span className="line-clamp-2 font-medium group-hover:text-primary">{playlist.name}</span>
 										<span className="text-xs text-muted-foreground">{pluralize(playlist.problemCount, "problem")}</span>
 									</span>
 									<ArrowUpRight className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

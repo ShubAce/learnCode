@@ -1,11 +1,13 @@
 import type { LanguageId } from "@/config/languages";
 import type { ExecutionProvider, ExecutionRequest, ExecutionResult } from "../types";
+import { ExecutionProviderError } from "../types";
 import { describeExitCode, isTimeoutError, mapWithConcurrency, readLanguageOverrides, requestJson, withRetry } from "../utils";
 
 /**
  * Wandbox (https://wandbox.org) — a free, key-less online compiler.
  * It is the zero-configuration default so code execution works out of the box.
- * The public instance is rate limited, so requests run with low concurrency and back off on HTTP 429.
+ * The public instance limits how many compiles an IP can make per minute, so requests back off on HTTP 429
+ * and identical runs are served from the cache in ../index.ts.
  */
 
 type Runtime = {
@@ -37,28 +39,55 @@ type WandboxResponse = {
 const config = () => ({
 	url: (process.env.WANDBOX_API_URL ?? "https://wandbox.org/api").replace(/\/+$/, ""),
 	timeoutMs: Number(process.env.WANDBOX_TIMEOUT_MS) || 20_000,
-	concurrency: Number(process.env.WANDBOX_CONCURRENCY) || 2,
+	concurrency: Number(process.env.WANDBOX_CONCURRENCY) || 4,
 	compilers: readLanguageOverrides<string>("WANDBOX_COMPILERS"),
 });
 
 function toResult(response: WandboxResponse): ExecutionResult {
-	const exitCode = Number(response.status ?? 0);
+	const exitCode = response.status ? Number(response.status) : null;
+	const signal = response.signal?.trim() ?? "";
 	const stdout = response.program_output ?? "";
 	const stderr = response.program_error ?? "";
 	const compilerOutput = response.compiler_error ?? "";
 	const base = { stdout, stderr, compileOutput: "", timeMs: null, memoryKb: null };
 
-	if (exitCode === 0) return { ...base, status: "OK" };
+	if (!signal && (exitCode === 0 || exitCode === null)) return { ...base, status: "OK" };
 
 	// The program never ran: the compiler reported an error.
 	if (!response.program_message && /\berror\b/i.test(compilerOutput)) {
 		return { ...base, status: "COMPILATION_ERROR", compileOutput: compilerOutput };
 	}
 
-	// Exit 137 = SIGKILL, which Wandbox sends when the time or memory limit is hit.
-	if (exitCode === 137) return { ...base, status: "TIME_LIMIT_EXCEEDED", stderr: stderr || describeExitCode(exitCode) };
+	// Exit 137 / SIGKILL is what Wandbox sends when the time or memory limit is hit.
+	if (exitCode === 137 || /kill|cpu time/i.test(signal)) {
+		return { ...base, status: "TIME_LIMIT_EXCEEDED", stderr: stderr || describeExitCode(137) };
+	}
 
-	return { ...base, status: "RUNTIME_ERROR", stderr: stderr || describeExitCode(exitCode) };
+	const reason = signal ? `Process terminated by signal: ${signal}` : describeExitCode(exitCode ?? 1);
+	return { ...base, status: "RUNTIME_ERROR", stderr: stderr || reason };
+}
+
+const timeLimitResult = (timeoutMs: number): ExecutionResult => ({
+	status: "TIME_LIMIT_EXCEEDED",
+	stdout: "",
+	stderr: `Execution exceeded the ${timeoutMs / 1000}s time limit`,
+	compileOutput: "",
+	timeMs: null,
+	memoryKb: null,
+});
+
+/** A trivial program that should answer in a couple of seconds whenever Wandbox is healthy. */
+async function isResponsive(url: string) {
+	try {
+		const response = await requestJson<WandboxResponse>("Wandbox", `${url}/compile.json`, {
+			method: "POST",
+			timeoutMs: 8_000,
+			body: { compiler: RUNTIMES.PYTHON.compiler, code: "print(1)" },
+		});
+		return response.status === "0";
+	} catch {
+		return false;
+	}
 }
 
 export const wandboxProvider: ExecutionProvider = {
@@ -67,8 +96,9 @@ export const wandboxProvider: ExecutionProvider = {
 	isConfigured: () => true,
 	async execute(requests: ExecutionRequest[]) {
 		const { url, timeoutMs, concurrency, compilers } = config();
+		let timedOut = false;
 
-		return mapWithConcurrency(requests, concurrency, async ({ language, source, stdin }) => {
+		const results = await mapWithConcurrency(requests, concurrency, async ({ language, source, stdin }) => {
 			const runtime = RUNTIMES[language];
 			try {
 				const response = await withRetry(() =>
@@ -88,17 +118,18 @@ export const wandboxProvider: ExecutionProvider = {
 			} catch (error) {
 				// Wandbox only kills runaway programs after ~40s, so we enforce our own limit.
 				if (isTimeoutError(error)) {
-					return {
-						status: "TIME_LIMIT_EXCEEDED",
-						stdout: "",
-						stderr: `Execution exceeded the ${timeoutMs / 1000}s time limit`,
-						compileOutput: "",
-						timeMs: null,
-						memoryKb: null,
-					} satisfies ExecutionResult;
+					timedOut = true;
+					return timeLimitResult(timeoutMs);
 				}
 				throw error;
 			}
 		});
+
+		// A timeout is either the user's code looping or Wandbox itself stalling. Only blame the code
+		// when a trivial program still runs promptly; otherwise let the provider chain fall back.
+		if (timedOut && !(await isResponsive(url))) {
+			throw new ExecutionProviderError("Wandbox", "is not responding");
+		}
+		return results;
 	},
 };

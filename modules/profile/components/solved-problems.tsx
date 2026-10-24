@@ -28,7 +28,7 @@ export function SolvedProblems({ solved }: { solved: ProfileData["solvedProblems
 					}
 				/>
 			) : (
-				<ul className="grid gap-2 sm:grid-cols-2">
+				<ul className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto">
 					{solved.map((item) => (
 						<li key={item.id}>
 							<Link

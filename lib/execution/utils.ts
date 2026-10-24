@@ -1,17 +1,30 @@
 import type { LanguageId } from "@/config/languages";
 import { ExecutionProviderError } from "./types";
 
-/** Runs `fn` over `items` with at most `limit` promises in flight, preserving order. */
+/**
+ * Runs `fn` over `items` with at most `limit` promises in flight, preserving order.
+ * After the first failure no new items are started, so a failing provider isn't hammered further.
+ */
 export async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
 	const results = new Array<R>(items.length);
 	let cursor = 0;
+	let failed = false;
+	let failure: unknown;
+
 	const worker = async () => {
-		while (cursor < items.length) {
+		while (cursor < items.length && !failed) {
 			const index = cursor++;
-			results[index] = await fn(items[index], index);
+			try {
+				results[index] = await fn(items[index], index);
+			} catch (error) {
+				if (!failed) failure = error;
+				failed = true;
+			}
 		}
 	};
+
 	await Promise.all(Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, worker));
+	if (failed) throw failure;
 	return results;
 }
 
