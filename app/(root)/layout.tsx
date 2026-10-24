@@ -1,18 +1,17 @@
-import { currentUserRole } from "@/modules/auth/actions";
-import Navbar from "@/modules/home/components/navbar";
-import React from "react";
+import { Backdrop } from "@/components/layout/backdrop";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { isAdmin } from "@/modules/auth/server";
 
-const RootLayout = async ({ children }: { children: React.ReactNode }) => {
-	const userRole = await currentUserRole();
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+	const admin = await isAdmin();
+
 	return (
-		<main className="flex flex-col min-h-screen max-h-screen">
-			<Navbar userRole={userRole}/>
-			<div className="flex-1 flex flex-col px-4 pb-4">
-				<div className="absolute inset-0 -z-10 h-full w-full bg-background dark:bg-[radial-gradient(#393e4a_1px,transparent_1px)] dark:bg-size-[16px_16px] bg-[radial-gradient(#dadde2_1px,transparent_1px)] bg-size-[16px_16px]" />
-				{children}
-			</div>
-		</main>
+		<div className="relative flex min-h-dvh flex-col">
+			<Backdrop />
+			<SiteHeader isAdmin={admin} />
+			<main className="flex-1">{children}</main>
+			<SiteFooter />
+		</div>
 	);
-};
-
-export default RootLayout;
+}

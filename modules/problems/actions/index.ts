@@ -1,517 +1,214 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { submitBatch, poolBatchResults } from "@/lib/judge0";
-import { UserRole } from "@/src/generated/browser";
-import { currentUser } from "@clerk/nextjs/server";
-import { ca } from "date-fns/locale";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/db";
+import { judge, type JudgeReport } from "@/lib/execution/judge";
+import { getDbUser, requireAdmin } from "@/modules/auth/server";
+import { getExistingProblemTitles, parseTestCases, toSubmissionSummary } from "../data";
+import { codeExecutionSchema, problemFormSchema, type CodeExecutionInput, type ProblemFormValues } from "../schema";
+import type { ActionResult, ExecutionReport } from "../types";
 
-export const getAllProblems = async () => {
-	try {
-		const user = await currentUser();
+/* ───────────── Helpers ───────────── */
 
-		// Only query user data if user is logged in
-		let data = null;
-		if (user) {
-			data = await db.user.findUnique({
-				where: {
-					clerkID: user.id,
-				},
-				select: {
-					id: true,
-				},
-			});
-		}
+const errorMessage = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
-		const problems = await db.problem.findMany({
-			include: {
-				solvedBy: data?.id
-					? {
-							where: {
-								userId: data.id,
-							},
-						}
-					: false,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		});
+function friendlyExecutionError(error: unknown) {
+	const message = errorMessage(error, "");
+	console.error("[judge]", message);
+	if (message.includes("429")) return "The code runner is busy right now (rate limited). Wait a few seconds and try again.";
+	return "Code execution is temporarily unavailable. Please try again in a moment.";
+}
 
-		// Ensure solvedBy is always an array for guest users
-		const problemsWithSolvedBy = problems.map((problem) => ({
-			...problem,
-			solvedBy: problem.solvedBy || [],
-		}));
-
-		return {
-			success: true,
-			data: problemsWithSolvedBy,
-		};
-	} catch (error) {
-		console.error("Error fetching problems:", error);
-		return {
-			success: false,
-			error: "An error occurred while fetching problems.",
-		};
-	}
-};
-
-export const getProblemById = async (id: string) => {
-	try {
-		const problem = await db.problem.findUnique({
-			where: {
-				id: id,
-			},
-		});
-		return {
-			success: true,
-			data: problem,
-		};
-	} catch (error) {
-		console.error("Error fetching problem by ID:", error);
-		return {
-			success: false,
-			error: "An error occurred while fetching the problem.",
-		};
-	}
-};
-
-export const deleteProblem = async (problemId: string) => {
-	try {
-		const user = await currentUser();
-		if (!user) {
-			throw new Error("Unauthorized");
-		}
-
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-			select: {
-				role: true,
-			},
-		});
-		if (dbUser?.role !== UserRole.ADMIN) {
-			throw new Error("Only ADMIN can delete problems");
-		}
-
-		await db.problem.delete({
-			where: {
-				id: problemId,
-			},
-		});
-
-		revalidatePath("/problems");
-		return {
-			success: true,
-			message: "Problem deleted successfully",
-		};
-	} catch (error) {
-		console.error("Error deleting problem:", error);
-		return {
-			success: false,
-			error: "An error occurred while deleting the problem.",
-		};
-	}
-};
-
-export const updateProblem = async (problemId: string, problemData: any) => {
-	try {
-		const user = await currentUser();
-		if (!user) {
-			return {
-				success: false,
-				error: "Unauthorized",
-			};
-		}
-
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-			select: {
-				role: true,
-			},
-		});
-
-		if (dbUser?.role !== UserRole.ADMIN) {
-			return {
-				success: false,
-				error: "Only ADMIN can update problems",
-			};
-		}
-
-		const updatedProblem = await db.problem.update({
-			where: {
-				id: problemId,
-			},
-			data: {
-				title: problemData.title,
-				description: problemData.description,
-				difficulty: problemData.difficulty,
-				tags: problemData.tags,
-				examples: problemData.examples,
-				constraints: problemData.constraints,
-				hints: problemData.hints,
-				editorial: problemData.editorial,
-				testCases: problemData.testCases,
-				codeSnippets: problemData.codeSnippets,
-				referenceSolutions: problemData.referenceSolutions,
-			},
-		});
-
-		revalidatePath(`/problem/${problemId}`);
-		revalidatePath("/");
-		return {
-			success: true,
-			message: "Problem updated successfully",
-			data: updatedProblem,
-		};
-	} catch (error) {
-		console.error("Error updating problem:", error);
-		return {
-			success: false,
-			error: "An error occurred while updating the problem.",
-		};
-	}
-};
-
-const getLanguageName = (languageId: number): string => {
-	const languageMap: Record<number, string> = {
-		71: "PYTHON",
-		63: "JAVASCRIPT",
-		62: "JAVA",
-		54: "CPP",
+function toReport(mode: ExecutionReport["mode"], report: JudgeReport): ExecutionReport {
+	return {
+		mode,
+		verdict: report.verdict,
+		passedCount: report.passedCount,
+		totalCount: report.totalCount,
+		runtimeMs: report.runtimeMs,
+		memoryKb: report.memoryKb,
+		provider: report.provider,
+		cases: report.outcomes,
 	};
-	return languageMap[languageId] || "UNKNOWN";
-};
+}
 
-// Normalises a Judge0 stdout/expected string for comparison:
-// trim surrounding whitespace and normalise internal newlines.
-const normalizeOutput = (s: string | null | undefined): string => {
-	if (!s) return "";
-	return s
-		.replace(/\r\n/g, "\n") // Windows → Unix line endings
-		.split("\n")
-		.map((line) => line.trimEnd()) // strip trailing spaces per line
-		.join("\n")
-		.trim();
-};
+/** Shared validation for run and submit: signed in, valid input, problem has test cases. */
+async function prepareExecution(input: CodeExecutionInput) {
+	const parsed = codeExecutionSchema.safeParse(input);
+	if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." } as const;
 
-// Run problem without saving to database - just returns test results
-export const runProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
+	const user = await getDbUser();
+	if (!user) return { ok: false, error: "Sign in to run your code." } as const;
+
+	const problem = await db.problem.findUnique({ where: { id: parsed.data.problemId }, select: { id: true, testCases: true } });
+	if (!problem) return { ok: false, error: "This problem no longer exists." } as const;
+
+	// Test cases always come from the database — never trust expected outputs sent by the client.
+	const testCases = parseTestCases(problem.testCases);
+	if (testCases.length === 0) return { ok: false, error: "This problem has no test cases yet." } as const;
+
+	return { ok: true, user, testCases, ...parsed.data } as const;
+}
+
+const metricList = (values: (number | null)[], format: (value: number) => string) =>
+	values.some((value) => value !== null) ? JSON.stringify(values.map((value) => (value === null ? null : format(value)))) : null;
+
+const toKb = (kb: number) => `${kb} KB`;
+const toSeconds = (ms: number) => `${(ms / 1000).toFixed(3)} sec`;
+
+/* ───────────── Code execution ───────────── */
+
+/** Runs code against the problem's test cases without recording a submission. */
+export async function runCode(input: CodeExecutionInput): Promise<ActionResult<ExecutionReport>> {
+	const prepared = await prepareExecution(input);
+	if (!prepared.ok) return { ok: false, error: prepared.error };
+
 	try {
-		const user = await currentUser();
-		if (!user) {
-			return {
-				success: false,
-				error: "Unauthorized",
-			};
-		}
-
-		if (!Array.isArray(stdin) || stdin.length === 0 || !Array.isArray(expected_outputs) || expected_outputs.length !== stdin.length) {
-			return {
-				success: false,
-				error: "Invalid input: stdin and expected_outputs must be non-empty arrays of the same length.",
-			};
-		}
-
-		const submissions = stdin.map((input: string) => {
-			return {
-				source_code,
-				language_id,
-				stdin: input,
-			};
-		});
-
-		console.log("Running code (no submission):", { language_id, testCaseCount: submissions.length });
-
-		const submitResponse = await submitBatch(submissions);
-		const tokens = submitResponse.map((res: any) => res.token).filter(Boolean) as string[];
-
-		if (tokens.length === 0) {
-			return {
-				success: false,
-				error: "Judge0 did not return any submission tokens. Check your API key and URL.",
-			};
-		}
-
-		const results = await poolBatchResults(tokens);
-
-		let allPassed = true;
-
-		const detailedResults = results.map((result: any, index: number) => {
-			const stdout = normalizeOutput(result.stdout) || null;
-			const expected_output = normalizeOutput(expected_outputs[index]);
-			const passed = stdout !== null && stdout === expected_output;
-			if (!passed) {
-				allPassed = false;
-			}
-
-			return {
-				testCase: (index + 1).toString(),
-				passed,
-				stdout,
-				expected: expected_output,
-				stderr: result.stderr?.trim() || null,
-				compile_output: result.compile_output?.trim() || null,
-				status: result.status?.description || "Unknown",
-				memory: result.memory ? `${result.memory} KB` : undefined,
-				time: result.time ? `${result.time} sec` : undefined,
-			};
-		});
-
-		return {
-			success: true,
-			allPassed,
-			testResults: detailedResults,
-		};
-	} catch (error: any) {
-		console.error("runProblem error:", error);
-		return {
-			success: false,
-			error: error?.message || "An unexpected error occurred while running the code.",
-		};
+		const report = await judge(prepared.language, prepared.code, prepared.testCases);
+		return { ok: true, data: toReport("run", report) };
+	} catch (error) {
+		return { ok: false, error: friendlyExecutionError(error) };
 	}
-};
+}
 
-// Submit problem - only saves to database if all test cases pass
-export const submitProblem = async (id: string, source_code: string, language_id: number, stdin: string[], expected_outputs: string[]) => {
+/** Judges the code and records the submission, whatever the verdict. */
+export async function submitCode(input: CodeExecutionInput): Promise<ActionResult<ExecutionReport>> {
+	const prepared = await prepareExecution(input);
+	if (!prepared.ok) return { ok: false, error: prepared.error };
+	const { user, problemId, language, code, testCases } = prepared;
+
+	let report: JudgeReport;
 	try {
-		const user = await currentUser();
+		report = await judge(language, code, testCases);
+	} catch (error) {
+		return { ok: false, error: friendlyExecutionError(error) };
+	}
 
-		// Require user to be logged in for submissions
-		if (!user) {
-			return {
-				success: false,
-				error: "You must be logged in to submit solutions.",
-			};
-		}
+	const accepted = report.verdict === "Accepted";
+	const outcomes = report.outcomes;
 
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-		});
-
-		if (!dbUser) {
-			return {
-				success: false,
-				error: "User not found in database.",
-			};
-		}
-		if (!Array.isArray(stdin) || stdin.length === 0 || !Array.isArray(expected_outputs) || expected_outputs.length !== stdin.length) {
-			return {
-				success: false,
-				error: "Invalid input: stdin and expected_outputs must be non-empty arrays of the same length.",
-			};
-		}
-		const submissions = stdin.map((input: string) => {
-			return {
-				source_code,
-				language_id,
-				stdin: input,
-			};
-		});
-
-		console.log("Submitting to Judge0:", { language_id, testCaseCount: submissions.length });
-
-		const submitResponse = await submitBatch(submissions);
-		const tokens = submitResponse.map((res: any) => res.token).filter(Boolean) as string[];
-
-		if (tokens.length === 0) {
-			return {
-				success: false,
-				error: "Judge0 did not return any submission tokens. Check your API key and URL.",
-			};
-		}
-
-		const results = await poolBatchResults(tokens);
-
-		let allPassed = true;
-
-		const detailedResults = results.map((result: any, index: number) => {
-			const stdout = normalizeOutput(result.stdout) || null;
-			const expected_output = normalizeOutput(expected_outputs[index]);
-			const passed = stdout !== null && stdout === expected_output;
-			if (!passed) {
-				allPassed = false;
-			}
-
-			console.log(`Test case ${index + 1}:`, {
-				status: result.status?.description,
-				stdout,
-				expected_output,
-				passed,
-				stderr: result.stderr,
-				compile_output: result.compile_output,
-			});
-
-			return {
-				testCase: (index + 1).toString(),
-				passed,
-				stdout,
-				expected: expected_output,
-				stderr: result.stderr?.trim() || null,
-				compile_output: result.compile_output?.trim() || null,
-				status: result.status?.description || "Unknown",
-				memory: result.memory ? `${result.memory} KB` : undefined,
-				time: result.time ? `${result.time} sec` : undefined,
-			};
-		});
-
-		// Only save submission if all test cases pass
-		if (!allPassed) {
-			return {
-				success: false,
-				allPassed: false,
-				testResults: detailedResults,
-				error: "Some test cases failed. Submission not saved.",
-			};
-		}
-
+	try {
 		const submission = await db.submission.create({
 			data: {
-				userId: dbUser.id,
-				problemId: id,
-				sourcecode: { code: source_code },
-				language: getLanguageName(language_id),
-				stdin: stdin.join("\n"),
-				stdout: JSON.stringify(detailedResults.map((res: any) => res.stdout || null)),
-				stderr: detailedResults.some((res: any) => res.stderr) ? JSON.stringify(detailedResults.map((res: any) => res.stderr || null)) : null,
-				compileOutput: detailedResults.some((res: any) => res.compile_output)
-					? JSON.stringify(detailedResults.map((res: any) => res.compile_output || null))
+				userId: user.id,
+				problemId,
+				sourcecode: { code },
+				language,
+				stdin: testCases.map((testCase) => testCase.input).join("\n"),
+				stdout: JSON.stringify(outcomes.map((outcome) => outcome.stdout || null)),
+				stderr: outcomes.some((outcome) => outcome.stderr) ? JSON.stringify(outcomes.map((outcome) => outcome.stderr || null)) : null,
+				compileOutput: outcomes.some((outcome) => outcome.compileOutput)
+					? JSON.stringify(outcomes.map((outcome) => outcome.compileOutput || null))
 					: null,
-				status: allPassed ? "Accepted" : "Wrong Answer",
-				memory: detailedResults.some((r: any) => r.memory) ? JSON.stringify(detailedResults.map((r: any) => r.memory || null)) : null,
-				time: detailedResults.some((r: any) => r.time) ? JSON.stringify(detailedResults.map((r: any) => r.time || null)) : null,
-			},
-		});
-
-		if (allPassed) {
-			await db.problemSolved.upsert({
-				where: {
-					userId_problemId: {
-						userId: dbUser.id,
-						problemId: id,
-					},
+				status: report.verdict,
+				memory: metricList(
+					outcomes.map((outcome) => outcome.memoryKb),
+					toKb,
+				),
+				time: metricList(
+					outcomes.map((outcome) => outcome.timeMs),
+					toSeconds,
+				),
+				testCases: {
+					create: outcomes.map((outcome) => ({
+						testCase: String(outcome.index + 1),
+						passed: outcome.passed,
+						stdout: outcome.stdout || null,
+						expected: outcome.expected,
+						stderr: outcome.stderr || null,
+						compileOutput: outcome.compileOutput || null,
+						status: outcome.verdict,
+						memory: outcome.memoryKb === null ? null : toKb(outcome.memoryKb),
+						time: outcome.timeMs === null ? null : toSeconds(outcome.timeMs),
+					})),
 				},
-				update: {},
-				create: {
-					userId: dbUser.id,
-					problemId: id,
-				},
-			});
+			},
+		});
+
+		let firstSolve = false;
+		if (accepted) {
+			const alreadySolved = await db.problemSolved.findUnique({ where: { userId_problemId: { userId: user.id, problemId } } });
+			if (!alreadySolved) {
+				await db.problemSolved.create({ data: { userId: user.id, problemId } });
+				firstSolve = true;
+			}
 		}
 
-		const testCaseResults = detailedResults.map((res: any) => ({
-			submissionId: submission.id,
-			testCase: res.testCase,
-			passed: res.passed,
-			stdout: res.stdout,
-			expected: res.expected,
-			stderr: res.stderr,
-			compileOutput: res.compile_output,
-			status: res.status,
-			memory: res.memory,
-			time: res.time,
-		}));
+		revalidatePath("/problems");
+		revalidatePath("/profile");
 
-		await db.testCaseResult.createMany({
-			data: testCaseResults,
-		});
-
-		const submissionWithTestCases = await db.submission.findUnique({
-			where: {
-				id: submission.id,
-			},
-			include: {
-				testCases: true,
-			},
-		});
-
-		return {
-			success: true,
-			submission: submissionWithTestCases,
-		};
-	} catch (error: any) {
-		console.error("submitProblem error:", error);
-		return {
-			success: false,
-			error: error?.message || "An unexpected error occurred while submitting the code.",
-		};
-	}
-};
-
-// Backward compatibility alias - defaults to submit behavior
-export const executeProblem = submitProblem;
-
-export const getAllSubmissionByCurrentUserForProblem = async (problemId: string) => {
-	try {
-		const user = await currentUser();
-
-		// If no user is logged in, return empty submissions
-		if (!user) {
-			return {
-				success: true,
-				data: [],
-			};
-		}
-
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-			select: {
-				id: true,
-			},
-		});
-
-		if (!dbUser) {
-			return {
-				success: true,
-				data: [],
-			};
-		}
-
-		const submissions = await db.submission.findMany({
-			where: {
-				problemId: problemId,
-				userId: dbUser.id,
-			},
-		});
-		return {
-			success: true,
-			data: submissions,
-		};
+		return { ok: true, data: { ...toReport("submit", report), submission: toSubmissionSummary(submission), firstSolve } };
 	} catch (error) {
-		console.error("Error fetching submissions:", error);
-		return {
-			success: false,
-			error: "An error occurred while fetching submissions.",
-		};
+		console.error("[submit] failed to save submission:", error);
+		return { ok: false, error: "Your code was judged, but saving the submission failed. Please try again." };
 	}
-};
+}
 
-export const getExistingProblemTitles = async () => {
+/* ───────────── Problem authoring (admin) ───────────── */
+
+function toProblemData(values: ProblemFormValues) {
+	return {
+		title: values.title,
+		description: values.description,
+		difficulty: values.difficulty,
+		tags: values.tags,
+		examples: values.examples,
+		constraints: values.constraints,
+		hints: values.hints?.trim() || null,
+		editorial: values.editorial?.trim() || null,
+		testCases: values.testCases,
+		codeSnippets: values.codeSnippets,
+		referenceSolutions: values.referenceSolutions,
+	};
+}
+
+export async function createProblem(values: ProblemFormValues): Promise<ActionResult<{ id: string }>> {
 	try {
-		const problems = await db.problem.findMany({
-			select: {
-				title: true,
-			},
-		});
-		return {
-			success: true,
-			data: problems.map((p) => p.title),
-		};
+		const admin = await requireAdmin();
+		const parsed = problemFormSchema.safeParse(values);
+		if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid problem data." };
+
+		const problem = await db.problem.create({ data: { ...toProblemData(parsed.data), userId: admin.id }, select: { id: true } });
+		revalidatePath("/problems");
+		revalidatePath("/");
+		return { ok: true, data: problem };
 	} catch (error) {
-		console.error("Error fetching problem titles:", error);
-		return {
-			success: false,
-			error: "An error occurred while fetching problem titles.",
-			data: [],
-		};
+		console.error("[createProblem]", error);
+		return { ok: false, error: errorMessage(error, "Failed to create the problem.") };
 	}
-};
+}
+
+export async function updateProblem(problemId: string, values: ProblemFormValues): Promise<ActionResult<{ id: string }>> {
+	try {
+		await requireAdmin();
+		const parsed = problemFormSchema.safeParse(values);
+		if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid problem data." };
+
+		const problem = await db.problem.update({ where: { id: problemId }, data: toProblemData(parsed.data), select: { id: true } });
+		revalidatePath(`/problem/${problemId}`);
+		revalidatePath("/problems");
+		return { ok: true, data: problem };
+	} catch (error) {
+		console.error("[updateProblem]", error);
+		return { ok: false, error: errorMessage(error, "Failed to update the problem.") };
+	}
+}
+
+export async function deleteProblem(problemId: string): Promise<ActionResult> {
+	try {
+		await requireAdmin();
+		await db.problem.delete({ where: { id: problemId } });
+		revalidatePath("/problems");
+		revalidatePath("/");
+		return { ok: true, data: undefined };
+	} catch (error) {
+		console.error("[deleteProblem]", error);
+		return { ok: false, error: errorMessage(error, "Failed to delete the problem.") };
+	}
+}
+
+/** Titles already published, so the sample loader can skip them. */
+export async function listProblemTitles(): Promise<string[]> {
+	await requireAdmin();
+	return getExistingProblemTitles();
+}

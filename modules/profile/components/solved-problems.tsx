@@ -1,84 +1,56 @@
-import React from "react";
-import { Trophy, CheckCircle, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Trophy } from "lucide-react";
+import Link from "next/link";
+import { DifficultyBadge } from "@/components/shared/difficulty-badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/format";
+import type { ProfileData } from "../data";
+import { Card } from "./card";
 
-type SolvedProblem = {
-	id: string;
-	problemId: string;
-	createdAt: Date | string;
-	problem: {
-		id: string;
-		title: string;
-		difficulty: string;
-	};
-};
-
-const SolvedProblems = ({ solvedProblems }: { solvedProblems: SolvedProblem[] }) => {
-	const formatDate = (dateString: Date | string) => {
-		return new Date(dateString).toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
-
+export function SolvedProblems({ solved }: { solved: ProfileData["solvedProblems"] }) {
 	return (
-		<Card className="mb-8">
-			<CardHeader>
-				<div className="flex items-center gap-3">
-					<Trophy className="w-6 h-6 text-green-500" />
-					<CardTitle className="text-2xl">Solved Problems</CardTitle>
-					<Badge variant="secondary">{solvedProblems.length}</Badge>
-				</div>
-			</CardHeader>
-			<CardContent>
-				{solvedProblems.length === 0 ? (
-					<div className="text-center py-12">
-						<div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-							<Trophy className="w-8 h-8 text-muted-foreground" />
-						</div>
-						<h3 className="text-lg font-medium mb-2">No Problems Solved Yet</h3>
-						<p className="text-muted-foreground">Start solving problems to see your achievements here!</p>
-					</div>
-				) : (
-					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{solvedProblems.map((problem: SolvedProblem) => (
-							<Card
-								key={problem.id}
-								className="hover:shadow-md transition-all duration-200 bg-green-50 dark:bg-green-950/50"
+		<Card
+			title="Solved problems"
+			description={solved.length > 0 ? `${solved.length} conquered so far` : undefined}
+		>
+			{solved.length === 0 ? (
+				<EmptyState
+					icon={Trophy}
+					title="No problems solved yet"
+					description="Your first accepted submission will land here. Start with an easy one."
+					action={
+						<Button
+							asChild
+							size="sm"
+						>
+							<Link href="/problems?difficulty=EASY">Find an easy problem</Link>
+						</Button>
+					}
+				/>
+			) : (
+				<ul className="grid gap-2 sm:grid-cols-2">
+					{solved.map((item) => (
+						<li key={item.id}>
+							<Link
+								href={`/problem/${item.problem.id}`}
+								className="group flex items-center gap-3 rounded-xl border bg-background/50 p-3 transition-colors hover:border-success/40 hover:bg-success/5"
 							>
-								<CardContent className="p-6">
-									<div className="flex items-start gap-3">
-										<div className="bg-green-100 dark:bg-green-900 rounded-full p-2">
-											<CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-										</div>
-										<div className="flex-1">
-											<h3 className="font-semibold mb-2">{problem.problem.title}</h3>
-											<div className="text-sm text-muted-foreground mb-3">
-												<Badge
-													variant="outline"
-													className="font-mono text-xs"
-												>
-													{problem.problem.difficulty}
-												</Badge>
-											</div>
-											<div className="flex items-center gap-1 text-xs text-muted-foreground">
-												<Calendar className="w-3 h-3" />
-												<span>Solved on {formatDate(problem.createdAt)}</span>
-											</div>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				)}
-			</CardContent>
+								<span className="grid size-8 shrink-0 place-items-center rounded-lg bg-success/15 text-success">
+									<CheckCircle2 className="size-4" />
+								</span>
+								<span className="flex min-w-0 flex-col">
+									<span className="truncate text-sm font-medium group-hover:text-success">{item.problem.title}</span>
+									<span className="text-xs text-muted-foreground">Solved {formatDate(item.solvedAt)}</span>
+								</span>
+								<DifficultyBadge
+									difficulty={item.problem.difficulty}
+									className="ml-auto"
+								/>
+							</Link>
+						</li>
+					))}
+				</ul>
+			)}
 		</Card>
 	);
-};
-
-export default SolvedProblems;
+}

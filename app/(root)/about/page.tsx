@@ -1,264 +1,187 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Code2, Target, Rocket, Heart, Users, Trophy, Zap, Globe, BookOpen, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Compass, HeartHandshake, Scale } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { GitHubIcon } from "@/components/brand/github-icon";
+import { AnimatedNumber } from "@/components/motion/animated-number";
+import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/reveal";
+import { SpotlightCard } from "@/components/motion/spotlight-card";
+import { Accent, Eyebrow, SectionHeading } from "@/components/shared/section-heading";
+import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
+import { TECH_STACK } from "@/config/stack";
+import { JudgePipeline } from "@/modules/home/components/judge-pipeline";
+import { getPlatformStats } from "@/modules/home/data";
 
-export default function AboutPage() {
-	const mission = [
-		{
-			icon: <Target className="w-6 h-6" />,
-			title: "Our Mission",
-			description:
-				"To empower developers worldwide by providing a platform that makes learning algorithms and data structures accessible, engaging, and effective.",
-		},
-		{
-			icon: <Rocket className="w-6 h-6" />,
-			title: "Our Vision",
-			description:
-				"To become the world's leading platform for technical interview preparation and competitive programming, helping millions achieve their career goals.",
-		},
-		{
-			icon: <Heart className="w-6 h-6" />,
-			title: "Our Values",
-			description:
-				"We believe in continuous learning, community support, and making quality education accessible to everyone, regardless of their background.",
-		},
-	];
+export const metadata: Metadata = {
+	title: "About",
+	description: `Why ${siteConfig.name} exists, how its judge works and what it's built with.`,
+};
 
-	const features = [
-		{
-			icon: <Code2 className="w-5 h-5" />,
-			title: "1,600+ Coding Problems",
-			description: "Curated collection of problems from easy to advanced levels",
-		},
-		{
-			icon: <Globe className="w-5 h-5" />,
-			title: "Multiple Languages",
-			description: "Support for JavaScript, Python, Java, C++ and more",
-		},
-		{
-			icon: <Zap className="w-5 h-5" />,
-			title: "Real-time Execution",
-			description: "Test your code instantly with immediate feedback",
-		},
-		{
-			icon: <Users className="w-5 h-5" />,
-			title: "Global Community",
-			description: "Learn from and compete with developers worldwide",
-		},
-		{
-			icon: <BookOpen className="w-5 h-5" />,
-			title: "Editorial Solutions",
-			description: "Detailed explanations and optimal solutions for every problem",
-		},
-		{
-			icon: <Trophy className="w-5 h-5" />,
-			title: "Track Progress",
-			description: "Monitor your growth with detailed analytics and achievements",
-		},
-	];
+const PRINCIPLES = [
+	{
+		icon: Compass,
+		title: "Deliberate practice",
+		description: "Short, focused problems with instant feedback beat passive reading. Every feature is built to keep you writing code.",
+	},
+	{
+		icon: Scale,
+		title: "Honest feedback",
+		description: "A real judge compiles and runs your code against hidden testcases. No green ticks you didn't earn.",
+	},
+	{
+		icon: HeartHandshake,
+		title: "Learning over copying",
+		description: "Hints, editorials and the AI tutor nudge you towards the idea instead of handing over the answer.",
+	},
+];
 
-	const stats = [
-		{ icon: <Users className="w-8 h-8" />, number: "10,000+", label: "Active Developers" },
-		{ icon: <Code2 className="w-8 h-8" />, number: "1,600+", label: "Coding Problems" },
-		{ icon: <Trophy className="w-8 h-8" />, number: "50K+", label: "Problems Solved" },
-		{ icon: <Award className="w-8 h-8" />, number: "98%", label: "Success Rate" },
-	];
+export default async function AboutPage() {
+	const stats = await getPlatformStats();
 
-	const team = [
-		{
-			role: "Platform Development",
-			description: "Built with modern technologies including Next.js, TypeScript, and Prisma for a fast, reliable experience.",
-		},
-		{
-			role: "Problem Curation",
-			description: "Carefully selected problems covering all major algorithms and data structures topics.",
-		},
-		{
-			role: "Community Support",
-			description: "Dedicated to helping developers learn, grow, and succeed in their programming journey.",
-		},
+	const liveStats = [
+		{ label: "Problems", value: stats.problems.total },
+		{ label: "Developers", value: stats.developers },
+		{ label: "Submissions judged", value: stats.submissions },
+		{ label: "Acceptance rate", value: stats.acceptanceRate ?? 0, suffix: "%", decimals: 0 },
 	];
 
 	return (
-		<div className="min-h-screen transition-colors mt-20">
-			{/* Hero Section */}
-			<section className="px-4 py-16">
-				<div className="max-w-6xl mx-auto text-center">
-					<Badge
-						variant="secondary"
-						className="mb-8 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900"
-					>
-						About Us
-					</Badge>
-
-					<h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white leading-tight mb-6">
-						Empowering Developers to{" "}
-						<span className="relative inline-block">
-							<span className="px-6 py-3 bg-amber-500 dark:bg-amber-400 text-white dark:text-gray-900 rounded-2xl transform inline-block shadow-lg -rotate-2">
-								Excel
-							</span>
-						</span>
+		<div className="flex flex-col">
+			<section className="px-4 pt-36 pb-16 sm:px-6">
+				<Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+					<Eyebrow>About {siteConfig.name}</Eyebrow>
+					<h1 className="text-5xl leading-[1.05] font-semibold tracking-tighter text-balance sm:text-6xl">
+						Built for people who <Accent>love</Accent> solving problems
 					</h1>
-
-					<p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-						LearnCode is a comprehensive platform designed to help developers master algorithms, ace technical interviews, and build
-						strong problem-solving skills.
+					<p className="max-w-2xl text-lg text-pretty text-muted-foreground">
+						{siteConfig.name} is an open-source practice platform for algorithms and data structures — a focused place to sharpen problem-solving
+						skills, prepare for interviews and actually enjoy the grind.
 					</p>
+				</Reveal>
+			</section>
+
+			<section className="px-4 py-12 sm:px-6">
+				<StaggerGroup className="mx-auto grid max-w-6xl gap-4 md:grid-cols-3">
+					{PRINCIPLES.map((principle) => (
+						<StaggerItem key={principle.title}>
+							<SpotlightCard className="h-full">
+								<div className="flex flex-col gap-4 p-7">
+									<span className="grid size-11 place-items-center rounded-xl border bg-primary/10 text-primary">
+										<principle.icon className="size-5" />
+									</span>
+									<h2 className="text-lg font-semibold tracking-tight">{principle.title}</h2>
+									<p className="text-sm text-pretty text-muted-foreground">{principle.description}</p>
+								</div>
+							</SpotlightCard>
+						</StaggerItem>
+					))}
+				</StaggerGroup>
+			</section>
+
+			<section className="px-4 py-24 sm:px-6">
+				<div className="mx-auto flex max-w-6xl flex-col gap-16">
+					<Reveal>
+						<SectionHeading
+							eyebrow="Under the hood"
+							title={
+								<>
+									How a submission gets <Accent>judged</Accent>
+								</>
+							}
+							description="Code execution is pluggable: the judge talks to whichever sandbox you configure and falls back automatically if one is unavailable."
+						/>
+					</Reveal>
+					<JudgePipeline />
 				</div>
 			</section>
 
-			{/* Mission, Vision, Values */}
-			<section className="px-4 py-16">
-				<div className="max-w-6xl mx-auto">
-					<div className="grid md:grid-cols-3 gap-8">
-						{mission.map((item, index) => (
-							<Card
-								key={index}
-								className="border-2 hover:border-amber-400 dark:hover:border-amber-600 transition-all duration-300 hover:shadow-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
+			<section className="px-4 py-12 sm:px-6">
+				<Reveal className="mx-auto max-w-6xl">
+					<dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border bg-border md:grid-cols-4">
+						{liveStats.map((stat) => (
+							<div
+								key={stat.label}
+								className="flex flex-col items-center gap-2 bg-card/90 px-6 py-10 backdrop-blur"
 							>
-								<CardHeader>
-									<div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-white mb-4">
-										{item.icon}
-									</div>
-									<CardTitle className="text-2xl font-bold">{item.title}</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.description}</p>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
-			</section>
-
-			{/* Stats Section */}
-			<section className="px-4 py-16 bg-gradient-to-br from-amber-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-				<div className="max-w-6xl mx-auto">
-					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">Platform Statistics</h2>
-						<p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-							Join thousands of developers who are improving their skills every day
-						</p>
-					</div>
-
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-						{stats.map((stat, index) => (
-							<Card
-								key={index}
-								className="text-center border-2 hover:border-amber-400 dark:hover:border-amber-600 transition-all duration-300 hover:shadow-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
-							>
-								<CardContent className="pt-8 pb-6">
-									<div className="flex justify-center mb-4 text-amber-600 dark:text-amber-400">{stat.icon}</div>
-									<div className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">{stat.number}</div>
-									<div className="text-sm text-gray-600 dark:text-gray-300 font-medium">{stat.label}</div>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
-			</section>
-
-			{/* Features Section */}
-			<section className="px-4 py-16">
-				<div className="max-w-6xl mx-auto">
-					<div className="text-center mb-12">
-						<Badge
-							variant="secondary"
-							className="mb-4 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-						>
-							Features
-						</Badge>
-						<h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">What Makes Us Different</h2>
-						<p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-							A comprehensive platform built for serious learners and competitive programmers
-						</p>
-					</div>
-
-					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{features.map((feature, index) => (
-							<Card
-								key={index}
-								className="border hover:border-amber-400 dark:hover:border-amber-600 transition-all duration-300 hover:shadow-lg bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
-							>
-								<CardHeader>
-									<div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center text-white mb-3">
-										{feature.icon}
-									</div>
-									<CardTitle className="text-lg font-bold">{feature.title}</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
-			</section>
-
-			{/* Team/Technology Section */}
-			<section className="px-4 py-16 bg-gradient-to-br from-indigo-50 to-amber-50 dark:from-gray-800 dark:to-gray-900">
-				<div className="max-w-6xl mx-auto">
-					<div className="text-center mb-12">
-						<h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-4">How We Build LearnCode</h2>
-						<p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-							Our commitment to providing the best learning experience through technology and community
-						</p>
-					</div>
-
-					<div className="grid md:grid-cols-3 gap-8">
-						{team.map((item, index) => (
-							<Card
-								key={index}
-								className="border-2 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
-							>
-								<CardHeader>
-									<CardTitle className="text-xl font-bold text-amber-600 dark:text-amber-400">{item.role}</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.description}</p>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
-			</section>
-
-			{/* CTA Section */}
-			<section className="px-4 py-20">
-				<div className="max-w-4xl mx-auto text-center">
-					<Card className="border-2 border-amber-400 dark:border-amber-600 bg-gradient-to-br from-amber-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
-						<CardContent className="pt-12 pb-12">
-							<h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-6">Ready to Start Your Journey?</h2>
-							<p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-								Join thousands of developers improving their skills every day. Start solving problems and achieve your programming
-								goals.
-							</p>
-							<div className="flex flex-col sm:flex-row gap-4 justify-center">
-								<Link href="/problems">
-									<Button
-										size="lg"
-										className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white font-bold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-									>
-										<Code2 className="w-5 h-5 mr-2" />
-										Browse Problems
-									</Button>
-								</Link>
-								<Link href="/profile">
-									<Button
-										size="lg"
-										variant="outline"
-										className="border-2 border-gray-300 dark:border-gray-600 font-bold px-8 py-6 text-lg rounded-xl hover:border-amber-400 dark:hover:border-amber-600 transition-all duration-300"
-									>
-										<Trophy className="w-5 h-5 mr-2" />
-										View Profile
-									</Button>
-								</Link>
+								<dd className="font-mono text-4xl font-semibold tracking-tight sm:text-5xl">
+									<AnimatedNumber
+										value={stat.value}
+										suffix={stat.suffix}
+										decimals={stat.decimals}
+									/>
+								</dd>
+								<dt className="text-sm text-muted-foreground">{stat.label}</dt>
 							</div>
-						</CardContent>
-					</Card>
+						))}
+					</dl>
+					<p className="mt-3 text-center text-xs text-muted-foreground">Live numbers, straight from the database.</p>
+				</Reveal>
+			</section>
+
+			<section className="px-4 py-24 sm:px-6">
+				<div className="mx-auto flex max-w-6xl flex-col gap-12">
+					<Reveal>
+						<SectionHeading
+							eyebrow="Stack"
+							title={
+								<>
+									Crafted with <Accent>modern</Accent> tools
+								</>
+							}
+							description="A typed, server-first architecture that is pleasant to extend."
+						/>
+					</Reveal>
+					<StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+						{TECH_STACK.map((tech) => (
+							<StaggerItem key={tech.name}>
+								<Link
+									href={tech.url}
+									target="_blank"
+									rel="noreferrer"
+									className="group flex items-center justify-between gap-4 rounded-2xl border bg-card/70 px-5 py-4 backdrop-blur transition-colors hover:border-primary/40"
+								>
+									<span className="flex flex-col">
+										<span className="font-medium">{tech.name}</span>
+										<span className="text-sm text-muted-foreground">{tech.role}</span>
+									</span>
+									<ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
+								</Link>
+							</StaggerItem>
+						))}
+					</StaggerGroup>
 				</div>
+			</section>
+
+			<section className="px-4 py-12 sm:px-6">
+				<Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-3xl border bg-card/80 px-6 py-14 text-center backdrop-blur">
+					<h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+						Open source, and <Accent>open</Accent> to ideas
+					</h2>
+					<p className="max-w-lg text-pretty text-muted-foreground">Found a bug, want a feature or a new problem? Contributions are welcome.</p>
+					<div className="flex flex-col gap-3 sm:flex-row">
+						<Button
+							asChild
+							size="lg"
+							className="rounded-full"
+						>
+							<Link
+								href={siteConfig.links.github}
+								target="_blank"
+								rel="noreferrer"
+							>
+								<GitHubIcon className="size-4" /> View on GitHub
+							</Link>
+						</Button>
+						<Button
+							asChild
+							size="lg"
+							variant="outline"
+							className="rounded-full"
+						>
+							<Link href="/problems">Start solving</Link>
+						</Button>
+					</div>
+				</Reveal>
 			</section>
 		</div>
 	);

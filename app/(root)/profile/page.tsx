@@ -1,62 +1,69 @@
-import { SubmissionHistory } from "@/modules/problems/components/submission-history";
-import { getCurrentUserData } from "@/modules/profile/actions";
-import PlaylistsSection from "@/modules/profile/components/playlist-section";
-import ProfileStats from "@/modules/profile/components/profile-stats";
-import SolvedProblems from "@/modules/profile/components/solved-problems";
-import UserInfoCard from "@/modules/profile/components/user-info-card";
-import React from "react";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { Reveal } from "@/components/motion/reveal";
+import { syncDbUser } from "@/modules/auth/server";
+import { ActivityHeatmap } from "@/modules/profile/components/activity-heatmap";
+import { DifficultyBreakdown } from "@/modules/profile/components/difficulty-breakdown";
+import { LanguageBreakdown } from "@/modules/profile/components/language-breakdown";
+import { PlaylistGrid } from "@/modules/profile/components/playlist-grid";
+import { ProfileHero } from "@/modules/profile/components/profile-hero";
+import { RecentSubmissions } from "@/modules/profile/components/recent-submissions";
+import { SolvedProblems } from "@/modules/profile/components/solved-problems";
+import { StatTiles } from "@/modules/profile/components/stat-tiles";
+import { getProfileData } from "@/modules/profile/data";
 
-const ProfilePage = async () => {
-	const profileData = await getCurrentUserData();
+export const metadata: Metadata = {
+	title: "Your profile",
+	description: "Track your solved problems, submissions, streaks and playlists.",
+};
 
-	if (!profileData || "error" in profileData) {
-		return (
-			<div className="h-full py-32">
-				<div className="container mx-auto px-4 max-w-7xl">
-					<div className="text-center">
-						<h1 className="text-2xl font-bold">Failed to load profile</h1>
-						<p className="text-muted-foreground">Please try again later.</p>
-					</div>
-				</div>
-			</div>
-		);
-	}
+export default async function ProfilePage() {
+	// Refresh name and avatar from Clerk on every visit to the profile
+	const user = await syncDbUser();
+	if (!user) redirect("/sign-in");
 
-	// Check if it's a guest user
-	const isGuest = profileData.clerkID === "guest";
+	const profile = await getProfileData(user.id);
 
 	return (
-		<div className="h-full py-32">
-			<div className="container mx-auto px-4 max-w-7xl">
-				{isGuest && (
-					<div className="mb-8 p-4 bg-muted rounded-lg border border-border">
-						<p className="text-center text-sm text-muted-foreground">
-							You are viewing as a guest.
-							<a
-								href="/sign-in"
-								className="text-primary hover:underline ml-1"
-							>
-								Sign in
-							</a>{" "}
-							to access your profile and track your progress.
-						</p>
-					</div>
-				)}
-				<UserInfoCard userData={profileData} />
-				<ProfileStats
-					submissions={profileData.submissions}
-					solvedCount={profileData.solvedProblems.length}
-					playlistCount={profileData.playlists.length}
-				/>
-				<SubmissionHistory submissions={profileData.submissions} />
+		<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-28 pb-8 sm:px-6">
+			<Reveal>
+				<ProfileHero user={profile.user} />
+			</Reveal>
+			<StatTiles stats={profile.stats} />
 
-				<div className="grid gap-8 mt-10">
-					<SolvedProblems solvedProblems={profileData.solvedProblems} />
-					<PlaylistsSection playlists={profileData.playlists} />
+			<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+				<div className="flex flex-col gap-6">
+					<Reveal>
+						<DifficultyBreakdown
+							solved={profile.solvedByDifficulty}
+							totals={profile.totalsByDifficulty}
+						/>
+					</Reveal>
+					<Reveal delay={0.05}>
+						<LanguageBreakdown languages={profile.languages} />
+					</Reveal>
 				</div>
+				<div className="flex min-w-0 flex-col gap-6">
+					<Reveal>
+						<ActivityHeatmap
+							days={profile.heatmap}
+							activeDays={profile.stats.activeDays}
+						/>
+					</Reveal>
+					<Reveal delay={0.05}>
+						<RecentSubmissions submissions={profile.recentSubmissions} />
+					</Reveal>
+				</div>
+			</div>
+
+			<div className="grid gap-6 lg:grid-cols-2">
+				<Reveal>
+					<SolvedProblems solved={profile.solvedProblems} />
+				</Reveal>
+				<Reveal delay={0.05}>
+					<PlaylistGrid playlists={profile.playlists} />
+				</Reveal>
 			</div>
 		</div>
 	);
-};
-
-export default ProfilePage;
+}

@@ -1,40 +1,35 @@
-import { db } from "@/lib/db";
-import { getAllProblems } from "@/modules/problems/actions";
-import ProblemsTable from "@/modules/problems/components/problem-table";
-import { currentUser } from "@clerk/nextjs/server";
-import React from "react";
+import type { Metadata } from "next";
+import { isDifficulty } from "@/config/difficulty";
+import { getDbUser } from "@/modules/auth/server";
+import { ProblemExplorer } from "@/modules/problems/components/problem-explorer";
+import { ProblemsHeader } from "@/modules/problems/components/problems-header";
+import { getProblemList } from "@/modules/problems/data";
 
-const ProblemsPage = async () => {
-	const user = await currentUser();
-	let dbUser = null;
-	if (user) {
-		dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-			select: {
-				id: true,
-				role: true,
-			},
-		});
-	}
+export const metadata: Metadata = {
+	title: "Problems",
+	description: "Browse, filter and solve curated coding problems by difficulty and topic.",
+};
 
-	const { data: problems, error } = await getAllProblems();
-	if (error) {
-		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<p className="text-destructive">Error in Loading Problems: {error}</p>
-			</div>
-		);
-	}
+type ProblemsPageProps = {
+	searchParams: Promise<{ difficulty?: string }>;
+};
+
+export default async function ProblemsPage({ searchParams }: ProblemsPageProps) {
+	const [user, params] = await Promise.all([getDbUser(), searchParams]);
+	const problems = await getProblemList(user?.id ?? null);
+
 	return (
-		<div className="container mx-auto py-32">
-			<ProblemsTable
-				problems={problems ?? []}
-				user={dbUser}
+		<div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-32 pb-8 sm:px-6">
+			<ProblemsHeader
+				problems={problems}
+				isSignedIn={Boolean(user)}
+			/>
+			<ProblemExplorer
+				problems={problems}
+				isSignedIn={Boolean(user)}
+				isAdmin={user?.role === "ADMIN"}
+				initialDifficulty={isDifficulty(params.difficulty) ? params.difficulty : "ALL"}
 			/>
 		</div>
 	);
-};
-
-export default ProblemsPage;
+}
