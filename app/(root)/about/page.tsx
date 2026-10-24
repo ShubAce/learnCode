@@ -26,7 +26,7 @@ const PRINCIPLES = [
 	{
 		icon: Scale,
 		title: "Honest feedback",
-		description: "A real judge compiles and runs your code against hidden testcases. No green ticks you didn't earn.",
+		description: "A real judge compiles and runs your code against every test case, including hidden ones. No green ticks you didn't earn.",
 	},
 	{
 		icon: HeartHandshake,

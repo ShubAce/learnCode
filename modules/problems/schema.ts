@@ -22,6 +22,7 @@ export const problemFormSchema = z.object({
 			z.object({
 				input: z.string().min(1, "Input is required"),
 				output: z.string().min(1, "Expected output is required"),
+				hidden: z.boolean().optional(),
 			}),
 		)
 		.min(1, "Add at least one test case"),

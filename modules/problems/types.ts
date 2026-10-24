@@ -20,7 +20,8 @@ export type ProblemListItem = {
 
 export type Example = { input: string; output: string; explanation?: string };
 
-export type TestCase = { input: string; output: string };
+/** Hidden test cases are judged on submit but never shown to solvers. */
+export type TestCase = { input: string; output: string; hidden?: boolean };
 
 export type ProblemNeighbor = { id: string; title: string } | null;
 
@@ -37,7 +38,9 @@ export type WorkspaceProblem = {
 	hints: string | null;
 	editorial: string | null;
 	examples: Example[];
+	/** Visible test cases only */
 	testCases: TestCase[];
+	hiddenTestCount: number;
 	codeSnippets: Partial<Record<LanguageId, string>>;
 	acceptanceRate: number | null;
 	prev: ProblemNeighbor;
@@ -65,6 +68,8 @@ export type CaseResult = {
 	passed: boolean;
 	timeMs: number | null;
 	memoryKb: number | null;
+	/** Input, output and stderr are withheld for hidden test cases */
+	hidden?: boolean;
 };
 
 export type ExecutionReport = {

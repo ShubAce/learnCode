@@ -6,7 +6,7 @@ import { judge, type JudgeReport } from "@/lib/execution/judge";
 import { getDbUser, requireAdmin } from "@/modules/auth/server";
 import { getExistingProblemTitles, parseTestCases, toSubmissionSummary } from "../data";
 import { codeExecutionSchema, problemFormSchema, type CodeExecutionInput, type ProblemFormValues } from "../schema";
-import type { ActionResult, ExecutionReport } from "../types";
+import type { ActionResult, ExecutionReport, TestCase } from "../types";
 
 /* ───────────── Helpers ───────────── */
 
@@ -19,7 +19,8 @@ function friendlyExecutionError(error: unknown) {
 	return "Code execution is temporarily unavailable. Please try again in a moment.";
 }
 
-function toReport(mode: ExecutionReport["mode"], report: JudgeReport): ExecutionReport {
+/** Builds the client-facing report, withholding everything that could reveal a hidden test case. */
+function toReport(mode: ExecutionReport["mode"], report: JudgeReport, testCases: TestCase[]): ExecutionReport {
 	return {
 		mode,
 		verdict: report.verdict,
@@ -28,7 +29,9 @@ function toReport(mode: ExecutionReport["mode"], report: JudgeReport): Execution
 		runtimeMs: report.runtimeMs,
 		memoryKb: report.memoryKb,
 		provider: report.provider,
-		cases: report.outcomes,
+		cases: report.outcomes.map((outcome) =>
+			testCases[outcome.index]?.hidden ? { ...outcome, input: "", expected: "", stdout: "", stderr: "", hidden: true } : outcome,
+		),
 	};
 }
 
@@ -58,14 +61,17 @@ const toSeconds = (ms: number) => `${(ms / 1000).toFixed(3)} sec`;
 
 /* ───────────── Code execution ───────────── */
 
-/** Runs code against the problem's test cases without recording a submission. */
+/** Runs code against the visible test cases (all of them if none are visible) without saving anything. */
 export async function runCode(input: CodeExecutionInput): Promise<ActionResult<ExecutionReport>> {
 	const prepared = await prepareExecution(input);
 	if (!prepared.ok) return { ok: false, error: prepared.error };
 
+	const visible = prepared.testCases.filter((testCase) => !testCase.hidden);
+	const testCases = visible.length > 0 ? visible : prepared.testCases;
+
 	try {
-		const report = await judge(prepared.language, prepared.code, prepared.testCases);
-		return { ok: true, data: toReport("run", report) };
+		const report = await judge(prepared.language, prepared.code, testCases);
+		return { ok: true, data: toReport("run", report, testCases) };
 	} catch (error) {
 		return { ok: false, error: friendlyExecutionError(error) };
 	}
@@ -125,19 +131,15 @@ export async function submitCode(input: CodeExecutionInput): Promise<ActionResul
 			},
 		});
 
-		let firstSolve = false;
-		if (accepted) {
-			const alreadySolved = await db.problemSolved.findUnique({ where: { userId_problemId: { userId: user.id, problemId } } });
-			if (!alreadySolved) {
-				await db.problemSolved.create({ data: { userId: user.id, problemId } });
-				firstSolve = true;
-			}
-		}
+		// Atomic "insert if absent": concurrent first solves (e.g. two tabs) can't collide on the unique key
+		const firstSolve = accepted
+			? (await db.problemSolved.createMany({ data: [{ userId: user.id, problemId }], skipDuplicates: true })).count > 0
+			: false;
 
 		revalidatePath("/problems");
 		revalidatePath("/profile");
 
-		return { ok: true, data: { ...toReport("submit", report), submission: toSubmissionSummary(submission), firstSolve } };
+		return { ok: true, data: { ...toReport("submit", report, testCases), submission: toSubmissionSummary(submission), firstSolve } };
 	} catch (error) {
 		console.error("[submit] failed to save submission:", error);
 		return { ok: false, error: "Your code was judged, but saving the submission failed. Please try again." };

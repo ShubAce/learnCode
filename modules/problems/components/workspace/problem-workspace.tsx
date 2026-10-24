@@ -228,6 +228,7 @@ export function ProblemWorkspace({ problem, initialSubmissions, initialSolved, i
 	const consolePanelContent = (collapsible: boolean) => (
 		<ConsolePanel
 			testCases={problem.testCases}
+			hiddenTestCount={problem.hiddenTestCount}
 			tab={consoleTab}
 			onTabChange={(tab) => {
 				setConsoleTab(tab);

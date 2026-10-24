@@ -14,7 +14,7 @@ export function parseTestCases(value: unknown): TestCase[] {
 	if (!Array.isArray(value)) return [];
 	return value
 		.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
-		.map((item) => ({ input: String(item.input ?? ""), output: String(item.output ?? "") }));
+		.map((item) => ({ input: String(item.input ?? ""), output: String(item.output ?? ""), hidden: item.hidden === true }));
 }
 
 /** Examples are stored per language; the workspace shows each distinct example once. */
@@ -141,6 +141,7 @@ export const getWorkspaceProblem = cache(async (id: string): Promise<WorkspacePr
 	const index = ordered.findIndex((item) => item.id === id);
 	const total = submissionStats.reduce((sum, row) => sum + row._count._all, 0);
 	const accepted = submissionStats.find((row) => row.status === "Accepted")?._count._all ?? 0;
+	const testCases = parseTestCases(problem.testCases);
 
 	return {
 		id: problem.id,
@@ -154,7 +155,9 @@ export const getWorkspaceProblem = cache(async (id: string): Promise<WorkspacePr
 		hints: problem.hints,
 		editorial: problem.editorial,
 		examples: parseExamples(problem.examples),
-		testCases: parseTestCases(problem.testCases),
+		// Hidden test cases never leave the server
+		testCases: testCases.filter((testCase) => !testCase.hidden).map(({ input, output }) => ({ input, output })),
+		hiddenTestCount: testCases.filter((testCase) => testCase.hidden).length,
 		codeSnippets: parseCodeSnippets(problem.codeSnippets),
 		acceptanceRate: total > 0 ? (accepted / total) * 100 : null,
 		prev: ordered[index - 1] ?? null,

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen, CheckCircle2, Code2, Copy, FileText, FlaskConical, Layers, Lightbulb, Loader2, Plus, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BookOpen, CheckCircle2, Code2, Copy, EyeOff, FileText, FlaskConical, Layers, Lightbulb, Loader2, Plus, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch, type FieldErrors } from "react-hook-form";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DIFFICULTIES, DIFFICULTY_META } from "@/config/difficulty";
 import { LANGUAGE_IDS, LANGUAGES, mapLanguages, type LanguageId } from "@/config/languages";
@@ -409,7 +410,7 @@ export function ProblemForm(props: ProblemFormProps) {
 				<FormSection
 					id="testcases"
 					title="Test cases"
-					description="Programs read the input from stdin; output is compared after trimming whitespace."
+					description="Programs read the input from stdin; output is compared after trimming whitespace. Hidden cases are only checked on submit and never shown to solvers."
 					action={
 						<Button
 							type="button"
@@ -426,22 +427,38 @@ export function ProblemForm(props: ProblemFormProps) {
 							key={field.id}
 							className="rounded-xl border bg-background/50 p-4"
 						>
-							<div className="mb-3 flex items-center justify-between">
+							<div className="mb-3 flex items-center justify-between gap-3">
 								<span className="inline-flex items-center gap-2 text-sm font-medium">
 									<span className="grid size-6 place-items-center rounded-md bg-primary/15 font-mono text-xs text-primary">{index + 1}</span>
 									Test case
 								</span>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon-sm"
-									onClick={() => testCases.remove(index)}
-									disabled={testCases.fields.length === 1}
-									aria-label={`Remove test case ${index + 1}`}
-									className="text-muted-foreground hover:text-destructive"
-								>
-									<Trash2 />
-								</Button>
+								<div className="flex items-center gap-3">
+									<Controller
+										control={control}
+										name={`testCases.${index}.hidden`}
+										render={({ field: hiddenField }) => (
+											<label className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+												<Switch
+													size="sm"
+													checked={Boolean(hiddenField.value)}
+													onCheckedChange={hiddenField.onChange}
+												/>
+												<EyeOff className="size-3.5" /> Hidden
+											</label>
+										)}
+									/>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-sm"
+										onClick={() => testCases.remove(index)}
+										disabled={testCases.fields.length === 1}
+										aria-label={`Remove test case ${index + 1}`}
+										className="text-muted-foreground hover:text-destructive"
+									>
+										<Trash2 />
+									</Button>
+								</div>
 							</div>
 							<div className="grid gap-3 md:grid-cols-2">
 								<div className="flex flex-col gap-1.5">

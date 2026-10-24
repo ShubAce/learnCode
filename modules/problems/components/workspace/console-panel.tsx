@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, ChevronDown, ChevronUp, Clock3, Cpu, FlaskConical, Loader2, RotateCw, Terminal, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ChevronUp, Clock3, Cpu, FlaskConical, Loader2, Lock, RotateCw, Terminal, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export type ConsoleTab = "testcase" | "result";
 
 type ConsolePanelProps = {
 	testCases: TestCase[];
+	hiddenTestCount: number;
 	tab: ConsoleTab;
 	onTabChange: (tab: ConsoleTab) => void;
 	pending: "run" | "submit" | null;
@@ -41,7 +42,15 @@ function Block({ label, value, tone = "default" }: { label: string; value: strin
 	);
 }
 
-function CaseTabs({ count, active, onSelect, passed }: { count: number; active: number; onSelect: (index: number) => void; passed?: boolean[] }) {
+type CaseTabsProps = {
+	count: number;
+	active: number;
+	onSelect: (index: number) => void;
+	passed?: boolean[];
+	hidden?: boolean[];
+};
+
+function CaseTabs({ count, active, onSelect, passed, hidden }: CaseTabsProps) {
 	return (
 		<div className="flex flex-wrap gap-1.5">
 			{Array.from({ length: count }, (_, index) => {
@@ -59,7 +68,8 @@ function CaseTabs({ count, active, onSelect, passed }: { count: number; active: 
 						{state !== undefined && (
 							<span className={cn("size-1.5 rounded-full", state ? "bg-success" : "bg-destructive")} />
 						)}
-						Case {index + 1}
+						{hidden?.[index] && <Lock className="size-3" />}
+						{hidden?.[index] ? "Hidden" : "Case"} {index + 1}
 					</button>
 				);
 			})}
@@ -147,8 +157,22 @@ function ResultView({ report }: { report: ExecutionReport }) {
 						active={active}
 						onSelect={setActive}
 						passed={report.cases.map((c) => c.passed)}
+						hidden={report.cases.map((c) => Boolean(c.hidden))}
 					/>
-					{current && (
+					{current?.hidden ? (
+						<div className="flex items-start gap-3 rounded-xl border border-dashed bg-muted/30 p-4">
+							<span className="grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+								<Lock className="size-4" />
+							</span>
+							<div className="flex flex-col gap-1">
+								<span className={cn("text-sm font-medium", getVerdictMeta(current.verdict).text)}>{current.verdict}</span>
+								<span className="text-xs text-muted-foreground">
+									This is a hidden test case, so its input and expected output stay secret. Check edge cases such as empty input, duplicates and
+									extreme values.
+								</span>
+							</div>
+						</div>
+					) : current && (
 						<div className="flex flex-col gap-3">
 							<Block
 								label="Input"
@@ -180,7 +204,18 @@ function ResultView({ report }: { report: ExecutionReport }) {
 	);
 }
 
-export function ConsolePanel({ testCases, tab, onTabChange, pending, report, error, onRetry, collapsed, onToggleCollapsed }: ConsolePanelProps) {
+export function ConsolePanel({
+	testCases,
+	hiddenTestCount,
+	tab,
+	onTabChange,
+	pending,
+	report,
+	error,
+	onRetry,
+	collapsed,
+	onToggleCollapsed,
+}: ConsolePanelProps) {
 	const [activeCase, setActiveCase] = useState(0);
 	const resultMeta = report ? getVerdictMeta(report.verdict) : null;
 
@@ -229,25 +264,35 @@ export function ConsolePanel({ testCases, tab, onTabChange, pending, report, err
 
 			<div className="min-h-0 flex-1 overflow-y-auto p-4">
 				{tab === "testcase" ? (
-					testCases.length === 0 ? (
-						<p className="text-sm text-muted-foreground">This problem has no testcases yet.</p>
-					) : (
-						<div className="flex flex-col gap-4">
-							<CaseTabs
-								count={testCases.length}
-								active={activeCase}
-								onSelect={setActiveCase}
-							/>
-							<Block
-								label="Input"
-								value={testCases[activeCase]?.input ?? ""}
-							/>
-							<Block
-								label="Expected output"
-								value={testCases[activeCase]?.output ?? ""}
-							/>
-						</div>
-					)
+					<div className="flex flex-col gap-4">
+						{testCases.length === 0 ? (
+							<p className="text-sm text-muted-foreground">
+								{hiddenTestCount > 0 ? "All test cases for this problem are hidden." : "This problem has no testcases yet."}
+							</p>
+						) : (
+							<>
+								<CaseTabs
+									count={testCases.length}
+									active={activeCase}
+									onSelect={setActiveCase}
+								/>
+								<Block
+									label="Input"
+									value={testCases[activeCase]?.input ?? ""}
+								/>
+								<Block
+									label="Expected output"
+									value={testCases[activeCase]?.output ?? ""}
+								/>
+							</>
+						)}
+						{hiddenTestCount > 0 && (
+							<p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+								<Lock className="size-3.5" /> Run checks the visible cases. Submit also checks {hiddenTestCount} hidden{" "}
+								{hiddenTestCount === 1 ? "case" : "cases"}.
+							</p>
+						)}
+					</div>
 				) : (
 					<AnimatePresence mode="wait">
 						{pending ? (

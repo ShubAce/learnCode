@@ -6,7 +6,7 @@ import { EXECUTION_PROVIDERS } from "@/config/stack";
 
 const STEPS = [
 	{ icon: Braces, title: "Your code", description: "Written in the in-browser Monaco editor and sent with a server action." },
-	{ icon: Server, title: "LearnCode server", description: "Validates the request and loads the hidden testcases from the database." },
+	{ icon: Server, title: "LearnCode server", description: "Validates the request and loads the test cases, hidden ones included, from the database." },
 	{ icon: Cpu, title: "Sandboxed runner", description: "Compiles and executes once per testcase on a pluggable provider." },
 	{ icon: CheckCircle2, title: "Verdict", description: "Outputs are compared and graded — Accepted, Wrong Answer, TLE and more." },
 ];

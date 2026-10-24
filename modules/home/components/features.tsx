@@ -20,7 +20,7 @@ const FEATURES: Feature[] = [
 		icon: Gauge,
 		title: "A real judge, not a toy",
 		description:
-			"Every run compiles and executes your code in a sandbox, then grades it against hidden expectations with precise verdicts — from Accepted to Time Limit Exceeded.",
+			"Every run compiles and executes your code in a sandbox, then grades it against the test cases (hidden ones included) with precise verdicts — from Accepted to Time Limit Exceeded.",
 		visual: <VerdictVisual />,
 		className: "md:col-span-4",
 	},
