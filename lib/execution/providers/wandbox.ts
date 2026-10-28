@@ -67,6 +67,17 @@ function toResult(response: WandboxResponse): ExecutionResult {
 	return { ...base, status: "RUNTIME_ERROR", stderr: stderr || reason };
 }
 
+// When the Wandbox host is overloaded its container runtime can fail before the program starts,
+// e.g. "OCI runtime error: crun: clone: Resource temporarily unavailable". That is Wandbox failing, not the user's code.
+const SANDBOX_FAILURE = /OCI runtime error|\b(?:crun|runc):/i;
+
+function assertSandboxStarted(response: WandboxResponse) {
+	const failure = [response.compiler_error, response.program_error].find((output) => output && SANDBOX_FAILURE.test(output));
+	// 503 so withRetry backs off and retries, and the result is never cached as a verdict
+	if (failure) throw new ExecutionProviderError("Wandbox", `sandbox failed to start: ${failure.trim().slice(0, 200)}`, { status: 503 });
+	return response;
+}
+
 const timeLimitResult = (timeoutMs: number): ExecutionResult => ({
 	status: "TIME_LIMIT_EXCEEDED",
 	stdout: "",
@@ -112,7 +123,7 @@ export const wandboxProvider: ExecutionProvider = {
 							...(runtime.options && { options: runtime.options }),
 							...(runtime.rawOptions && { "compiler-option-raw": runtime.rawOptions }),
 						},
-					}),
+					}).then(assertSandboxStarted),
 				);
 				return toResult(response);
 			} catch (error) {
