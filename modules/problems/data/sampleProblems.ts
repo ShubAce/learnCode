@@ -1,3 +1,5 @@
+import type { TopicId } from "@/config/topics";
+
 // Sample Problem Data for Create Problem Form
 // Each problem type has at least 2 sample problems
 
@@ -3353,7 +3355,7 @@ export const problemsByType = {
   BitManipulation: bitManipulationProblems,
   Heap: heapProblems,
   Sorting: sortingProblems,
-};
+} satisfies Record<TopicId, readonly unknown[]>;
 
 // Export default sample (first problem of each type)
 export const defaultSamples = {

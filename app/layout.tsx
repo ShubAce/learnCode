@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { shadcn } from "@clerk/themes";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { siteConfig } from "@/config/site";
+import "./globals.css";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -15,29 +18,74 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+const instrumentSerif = Instrument_Serif({
+	variable: "--font-instrument-serif",
+	subsets: ["latin"],
+	weight: "400",
+	style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-	title: "LearnCode - A LeetCode Clone",
-	description:
-		"A modern LeetCode clone built with Next.js, Prisma, and Clerk for authentication. Practice coding problems, track your progress, and enhance your skills in a sleek and user-friendly interface.",
+	metadataBase: new URL(siteConfig.url),
+	title: {
+		default: `${siteConfig.name} — ${siteConfig.tagline}`,
+		template: `%s · ${siteConfig.name}`,
+	},
+	description: siteConfig.description,
+	keywords: siteConfig.keywords,
+	authors: [siteConfig.author],
+	creator: siteConfig.author.name,
+	openGraph: {
+		type: "website",
+		url: siteConfig.url,
+		siteName: siteConfig.name,
+		title: siteConfig.name,
+		description: siteConfig.description,
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: siteConfig.name,
+		description: siteConfig.description,
+	},
 };
 
-export default function RootLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#fbfaf7" },
+		{ media: "(prefers-color-scheme: dark)", color: "#0f0e0d" },
+	],
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<ClerkProvider>
-			<html lang="en">
-				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+		<ClerkProvider
+			appearance={{
+				theme: shadcn,
+				variables: { borderRadius: "0.75rem", fontFamily: "var(--font-geist-sans)" },
+				elements: {
+					cardBox: "shadow-2xl shadow-black/10 border rounded-2xl",
+					formButtonPrimary: "font-semibold",
+				},
+			}}
+		>
+			<html
+				lang="en"
+				suppressHydrationWarning
+			>
+				<body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} font-sans antialiased`}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"
 						enableSystem
 						disableTransitionOnChange
 					>
-						<Toaster />
-						{children}
+						<TooltipProvider delayDuration={200}>
+							{children}
+							<Toaster
+								position="top-center"
+								closeButton
+							/>
+						</TooltipProvider>
 					</ThemeProvider>
 				</body>
 			</html>

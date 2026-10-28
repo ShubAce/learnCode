@@ -1,80 +1,30 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getDbUser } from "@/modules/auth/server";
+import { createPlaylist, listPlaylists, PlaylistError, playlistSchema } from "@/modules/playlists/server";
 
-export async function GET(request: Request) {
-	try {
-		const user = await currentUser();
-		if (!user) {
-			return NextResponse.json({ error: "Unauthorized", success: false }, { status: 401 });
-		}
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-		});
-		if (!dbUser) {
-			return NextResponse.json({ error: "User not found", success: false }, { status: 404 });
-		}
+export async function GET() {
+	const user = await getDbUser();
+	if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-		const playlists = await db.playlist.findMany({
-			where: {
-				userId: dbUser.id,
-			},
-			include: {
-				problems: {
-					include: {
-						problem: {
-							select: {
-								id: true,
-								title: true,
-								difficulty: true,
-							},
-						},
-					},
-				},
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		});
-		return NextResponse.json({ success: true, data: playlists }, { status: 200 });
-	} catch (error) {
-		console.error("Error fetching playlists:", error);
-		return NextResponse.json({ error: "Internal Server Error", success: false }, { status: 500 });
-	}
+	const playlists = await listPlaylists(user.id);
+	return NextResponse.json({ success: true, data: playlists });
 }
 
 export async function POST(request: Request) {
+	const user = await getDbUser();
+	if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+
+	const parsed = playlistSchema.safeParse(await request.json().catch(() => null));
+	if (!parsed.success) {
+		return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message ?? "Invalid playlist" }, { status: 400 });
+	}
+
 	try {
-		const user = await currentUser();
-		if (!user) {
-			return NextResponse.json({ error: "Unauthorized", success: false }, { status: 401 });
-		}
-		const dbUser = await db.user.findUnique({
-			where: {
-				clerkID: user.id,
-			},
-		});
-		if (!dbUser) {
-			return NextResponse.json({ error: "User not found", success: false }, { status: 404 });
-		}
-		const { name, description } = await request.json();
-		if (!name) {
-			return NextResponse.json({ error: "Name is required", success: false }, { status: 400 });
-		}
-
-		const playlistData = await db.playlist.create({
-			data: {
-				name,
-				description,
-				userId: dbUser.id,
-			},
-		});
-
-		return NextResponse.json({ success: true, data: playlistData }, { status: 201 });
+		const playlist = await createPlaylist(user.id, parsed.data);
+		return NextResponse.json({ success: true, data: playlist }, { status: 201 });
 	} catch (error) {
-		console.error("Error creating playlist:", error);
-		return NextResponse.json({ error: "Internal Server Error", success: false }, { status: 500 });
+		if (error instanceof PlaylistError) return NextResponse.json({ success: false, error: error.message }, { status: 409 });
+		console.error("[api/playlists]", error);
+		return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
 	}
 }

@@ -1,10 +1,8 @@
-import React from 'react'
-import { SignIn } from '@clerk/nextjs'
+import { SignIn } from "@clerk/nextjs";
+import type { Metadata } from "next";
 
-function SignInPage() {
-  return (
-    <SignIn />
-  )
+export const metadata: Metadata = { title: "Sign in" };
+
+export default function SignInPage() {
+	return <SignIn />;
 }
-
-export default SignInPage
